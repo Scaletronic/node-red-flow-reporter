@@ -1,4 +1,4 @@
-
+#! /usr/bin/env node
 const fs = require("fs");
 const { parseFlow } = require("@node-red/flow-parser");
 const FlowParser = require("@node-red/flow-parser");
