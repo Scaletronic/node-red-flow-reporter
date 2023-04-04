@@ -8,7 +8,7 @@ import * as fw from "./2_infra/file-writer"
 import { extractConfigHeaders, extractHeaders } from "./0_domain/node-extractors";
 import { formatNodeInformation } from "./0_domain/formatters";
 
-let fileName: string;
+let fileName: string = "";
 if (process.argv.length <= 2) {
   console.error("No filename given as argument");
   process.exit(1)
