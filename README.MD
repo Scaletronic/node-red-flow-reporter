@@ -2,8 +2,9 @@
 
 Make [NodeRED](https://node-red.org) flows easier to read and easier to compare versions in Version Control tools like git
 
-![PNG Image of the result of viewing a markdown file from a flow reporter](docs/flow-report-sample-02.png)
-
+<table border='solid 1px'><tr><td>
+    <img src='docs/flow-report-sample-02.png' />
+</td><td></table>
 
 The Node-RED Flow Report is using the [Node-RED Flow Parser](https://github.com/node-red/flow-parser)
 
