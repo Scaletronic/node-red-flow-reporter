@@ -2,7 +2,11 @@
   "name": "node-red-flow-reporter",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "node-red-flow-reporter": "./dist/index.js"
+  },
+
   "scripts": {
     "test": "ts-mocha src/*.spec.ts",
     "ts-cli": "ts-node src",
