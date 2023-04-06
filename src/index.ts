@@ -2,11 +2,12 @@
 const fs = require("fs");
 const { parseFlow } = require("@node-red/flow-parser");
 const FlowParser = require("@node-red/flow-parser");
-import { prettyFromCamelCase } from "./units";
 
 import * as fw from "./2_infra/file-writer"
-import { extractConfigHeaders, extractHeaders } from "./0_domain/node-extractors";
-import { formatNodeInformation } from "./0_domain/formatters";
+import { printNodeHeadline, setOutputWriter } from "./1_app/printNodeHeadline";
+
+const fileWriteLine = fw.addOutputPart
+setOutputWriter(fw)
 
 let fileName: string = "";
 if (process.argv.length <= 2) {
@@ -18,7 +19,7 @@ if (process.argv.length <= 2) {
   console.log("File size " + fs.statSync(fileName).size)
 }
 
-const fileWriteLine = fw.addOutputPart
+
 
 // Load the flow json from a local file and parse to an object
 // const exampleFlow = JSON.parse(fs.readFileSync("scripts-dev/flow-report-ts/test_data/test-01.json", "utf-8"));
@@ -57,27 +58,6 @@ flow.walk(function (obj: any) {
   }
 })
 
-
-function printNodeHeadline(nodes: any[]) {
-  const configHeadlines = extractConfigHeaders(nodes) as string[]
-  const nodeHeadlines = ['name', ...configHeadlines, ...extractHeaders(nodes) as string[]]
-  fileWriteLine(nodeHeadlines.map(prettyFromCamelCase).join(" | "))
-  fileWriteLine(nodeHeadlines.map(a => '-----').join("|"))
-  const sortedNodes = nodes.sort((a, b) => a.config['name'].localeCompare(b.config['name']))
-  sortedNodes.forEach(node => {
-    const lineParts: string[] = []
-    nodeHeadlines.forEach(headline => {
-      if (node[headline]) {
-        lineParts.push(formatNodeInformation(nodes,node, headline))
-      } else if (node.config[headline]) {
-        lineParts.push(formatNodeInformation(nodes, node.config, headline))
-      } else {
-        lineParts.push('&nbsp;')
-      }
-    })
-    fileWriteLine(lineParts.join(" | "))
-  })
-}
 
 function printNodes(nodes: NodesType): void {
   const nodeNames = Object.keys(nodes).sort((a, b) => a.localeCompare(b))

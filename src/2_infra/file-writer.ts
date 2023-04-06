@@ -9,3 +9,4 @@ export function addOutputPart(outputPart: string) {
 export function writeOutputPart(fileName: string) {
   writeFileSync(fileName, outputParts.join('\n'),"utf-8")
 }
+

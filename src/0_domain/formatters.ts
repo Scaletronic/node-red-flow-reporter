@@ -1,4 +1,4 @@
-export function formatNodeInformation(nodes: Record<string, any>, node: any, headline: string) {
+export function formatNodeInformation(nodes: Record<string, any>, node: any, headline: string): String {
   let value = node[headline] // actually 'inboundWires'
   if (value === undefined) return '(undef)'
   if (value.length > 80) {
@@ -49,5 +49,5 @@ export function formatNodeInformation(nodes: Record<string, any>, node: any, hea
       throw new Error("Error" + JSON.stringify({ ...value }))
     }
   }
-  return value;
+  return String(value);
 }
