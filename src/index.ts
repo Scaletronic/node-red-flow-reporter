@@ -30,7 +30,7 @@ fileWriteLine(`Filename: ${fileName}`)
 fileWriteLine("")
 const flow = parseFlow(exampleFlow);
 type SimilarNodeList = any[]
-type NodesType = Record<string, any>
+export type NodesType = Record<string, any>
 
 const nodes: NodesType = []
 
@@ -63,7 +63,7 @@ function printNodes(nodes: NodesType): void {
   const nodeNames = Object.keys(nodes).sort((a, b) => a.localeCompare(b))
   nodeNames.forEach(nodeName => {
     fileWriteLine(`## Node type '${nodeName}' is used ${nodes[nodeName].length} times`)
-    printNodeHeadline(nodes[nodeName])
+    printNodeHeadline(nodes[nodeName], nodes)
     fileWriteLine("\n")
   })
 }
