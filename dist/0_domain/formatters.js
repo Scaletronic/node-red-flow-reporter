@@ -56,6 +56,6 @@ function formatNodeInformation(nodes, node, headline) {
             throw new Error("Error" + JSON.stringify(Object.assign({}, value)));
         }
     }
-    return value;
+    return String(value);
 }
 exports.formatNodeInformation = formatNodeInformation;
