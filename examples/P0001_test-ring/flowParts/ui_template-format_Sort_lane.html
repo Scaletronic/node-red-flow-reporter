@@ -1,0 +1,61 @@
+<link rel="stylesheet" type="text/css" href="/scaletronic-dws.css">
+<div class="rounded-sort-path-bar">
+  <div class="dws-data-header">{{ dataHeaders.sorting.header }}</div>
+  <div class="dws-data-frame" ng-if="dataObject.sorting.sortPath">
+    <div ng-show="!dataObject.hasData || dataObject.sorting.good" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.sorting.good" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'sort-path-data dws-good-data':(dataObject.sorting.good || !dataObject.hasData), 'sort-path-data dws-bad-data':(!dataObject.sorting.good && dataObject.hasData)}">{{dataObject.sorting.sortPath }}</div>
+  </div>
+  <div class="dws-data-frame" ng-if="!dataObject.sorting.sortPath">
+    <div class="dws-check-mark-pending"></div>
+    <div class="sort-path-data dws-good-data">&nbsp;</div>
+  </div>
+</div>
+
+<script>
+(function(scope) {
+const filterScanSource = localStorage.getItem('filterScanSource') || ''
+/**
+ * Statis texts for data headers for the DWS dashboard.
+ */
+scope.dataHeaders = {
+  sorting : {
+    header: ''
+  }
+};
+
+/**
+ * Data object used for mapping and transferring package
+ * data to the DWS dashboard.
+ */
+scope.dataObject = {
+  hasData: false,
+  corrId: -1,
+  scanDate: '',
+  scanTime: '',
+  sorting : {
+    sortPath: '',
+    good: false
+  },
+};
+
+scope.$watch("msg", (msg) => {
+  if(msg) {
+    // Update displayed status when a data update is received
+    if(msg.topic === 'uiDataheaders') {
+      scope.dataHeaders = msg.payload;
+    } else if(msg.topic === 'uiData') {
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      scope.dataObject = msg.payload;
+    } else if(msg.topic === 'uiDataUpdate' && scope.dataObject.corrId == msg.payload.corrId) {
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      scope.dataObject = msg.payload;
+    }
+  }
+});
+})(scope);
+</script>

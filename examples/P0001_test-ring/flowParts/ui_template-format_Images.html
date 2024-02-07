@@ -1,0 +1,95 @@
+<link rel="stylesheet" type="text/css" href="/scaletronic-dws.css">
+<div class="dws-rounded-image-box">
+  <!-- Image 1 - if available -->
+  <div class="dws-image-frame" ng-show="dataObject.images.noOfImages" ng-click="showLargeImage(0)">
+    <img ng-src="{{ dataObject.images.images[0] }}" class="dws-image" />
+  </div>
+  <!-- Image 2 - if available -->
+  <div class="dws-image-frame" ng-show="dataObject.images.noOfImages > 1" ng-click="showLargeImage(1)">
+    <img ng-src="{{ dataObject.images.images[1] }}" class="dws-image" />
+  </div>
+  <!-- Image 3 - if available -->
+  <div class="dws-image-frame" ng-show="dataObject.images.noOfImages > 2" ng-click="showLargeImage(2)">
+    <img ng-src="{{ dataObject.images.images[2] }}" class="dws-image" />
+  </div>
+  <!-- Image 4 - if available -->
+  <div class="dws-image-frame" ng-show="dataObject.images.noOfImages > 3" ng-click="showLargeImage(3)">
+    <img ng-src="{{ dataObject.images.images[3] }}" class="dws-image" />
+  </div>
+</div>
+
+<div ng-class="{'modal':!showImageDialog, 'modal show-modal modal-layer-image':showImageDialog}" ng-click="closeImageDialog()">
+  <div class="modal-content-image" ng-click="$event.stopPropagation()">
+    <span class="close-button" ng-click="closeImageDialog()">&times;</span>
+	<div class="image-dialog-frame">
+	  <img ng-src="{{ largeImage }}" class="image-dialog-image" />
+	</div>
+  </div>
+</div>
+
+<script>
+(function(scope) {
+const filterScanSource = localStorage.getItem('filterScanSource') || ''
+/**
+ * Statis texts for data headers for the DWS dashboard.
+ */
+scope.dataHeaders = {
+  images: {
+    noOfImages: 0,
+  },
+};
+
+/**
+ * Data object used for mapping and transferring package
+ * data to the DWS dashboard.
+ */
+scope.dataObject = {
+  hasData: false,
+  corrId: -1,
+  scanDate: '',
+  scanTime: '',
+  images: {
+    noOfImages: 0,
+    images: [],
+    good: []
+  },
+};
+
+/**
+* Image dialog
+*/
+scope.showImageDialog = false;
+scope.largeImage = null;
+scope.showLargeImage = (index) => {
+  if(scope.dataObject.images.noOfImages >= index + 1) {  // Add condition: && scope.dataObject.images.good[index]
+    scope.largeImage = scope.dataObject.images.images[index];
+	scope.openImageDialog();
+  }
+};
+scope.openImageDialog = () => {
+  scope.showImageDialog = true;
+}
+scope.closeImageDialog = () => {
+  scope.showImageDialog = false;
+}
+
+scope.$watch("msg", (msg) => {
+  if(msg) {
+    // Update displayed status when a data update is received
+    if(msg.topic === 'uiDataheaders') {
+      scope.dataHeaders = msg.payload;
+    } else if(msg.topic === 'uiData') {
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      scope.dataObject = msg.payload;
+    } else if(msg.topic === 'uiDataUpdate' && scope.dataObject.corrId == msg.payload.corrId) {
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      scope.dataObject = msg.payload;
+    }
+  }
+});
+})(scope);
+</script>

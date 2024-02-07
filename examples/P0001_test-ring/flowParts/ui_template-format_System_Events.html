@@ -1,0 +1,59 @@
+<div
+  style="height: 100%; overflow: auto; background-color: var(--dws-container-bg-color); border-radius: 15px; scrollbar-width: thin;">
+  <p ng-repeat="event in events | orderBy: '-' track by event.id" style="margin-left: 15px;">
+    {{ event.timestamp | date:'dd MMM HH:mm:ss' }} | {{ event.message }}
+  </p>
+</div>
+
+<script>
+  (function (scope) {
+    scope.events = [{
+      timestamp: Date.now(), message: "Dashboard loaded"
+    }]
+
+    // TODO this is a dev thing that is it not needed satisfy the customers requirement.
+    // scope.send({
+    //   topic: 'userLoad',
+    //   payload: {
+    //     instruction: 'send_latest_events',
+    //     /** This enables the backend to send message before this timestamp. */
+    //     timestamp: Date.now()
+    //   }
+    // })
+
+    scope.$watch('msg', (msg) => {
+      if (msg) {
+        switch (msg.topic) {
+          case 'event':
+            /** @type {{message: string, timestamp: number, id: string}} */
+            const event = {
+              id: msg.payload.id,
+              message: msg.payload.message,
+              timestamp: msg.payload.timestamp,
+            }
+
+            // event could be new or an update of an old event.
+            // If it is new, we add to the event array.
+            // If it is old, we just update the old event based on the id.
+            let eventAlreadyPresent = false
+            for (const currentEvent of scope.events) {
+              if (event.id === currentEvent.id) {
+                eventAlreadyPresent = true
+                currentEvent.message = event.message
+                currentEvent.timestamp = event.timestamp
+              }
+            }
+
+            if (!eventAlreadyPresent) {
+              scope.events.push(event)
+            }
+
+            while (scope.events.length > 200) {
+              scope.events.shift()
+            }
+            break;
+        }
+      }
+    })
+  })(scope)
+</script>

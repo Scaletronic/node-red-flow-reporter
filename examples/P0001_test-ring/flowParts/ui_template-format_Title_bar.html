@@ -1,0 +1,471 @@
+<link rel="stylesheet" type="text/css" href="/scaletronic-dws.css" />
+<link rel="stylesheet" type="text/css" href="/dws-spinner.css">
+<div class="dws-titlebar">
+  <div class="dws-toolbar-button" ng-click="openOptionsDialog()"><i class="fa fa-cog"></i></div>
+  <img src="/Scaletronic-logo-light.png" alt="Scaletronic logo" style="width:400px;height:auto;" />
+</div>
+
+<!-- Show startup screen until we believe everything has been initialized -->
+<div class="dws-init-wrapper"
+  ng-class="{'dws-init-screen':initialized, 'dws-init-screen dws-init-screen-show':!initialized}">
+  <div class="dws-loader-wrapper">
+    <div class="loader">
+      <div class="face">
+        <div class="circle"></div>
+      </div>
+      <div class="face">
+        <div class="circle"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Options dialog -->
+<div ng-class="{'modal':!showOptionsDialog, 'modal show-modal modal-layer-options':showOptionsDialog}"
+  ng-click="closeOptionsDialog()">
+  <div class="modal-content-options" ng-click="$event.stopPropagation()">
+    <span class="close-button" ng-click="closeOptionsDialog()">&times;</span>
+    <!-- Dialog title bar -->
+    <div class="dws-options-dialog-header-row">
+      <div class="dws-dialog-header">Options</div>
+    </div>
+
+    <div class="dws-options-dialog-row">
+
+      <div>
+        <div class="dws-option-header">Theme</div>
+        <div class="dws-option-frame">
+          <div class="dws-option">
+            <input type="radio" id="dwsDarkTheme" name="dwsTheme" value="dark" ng-click="selectTheme()" />
+            <label for="dwsDarkTheme" class="dws-option-label">&nbsp;Dark theme</label>
+          </div>
+          <div class="dws-option">
+            <input type="radio" id="dwsLightTheme" name="dwsTheme" value="light" ng-click="selectTheme()" />
+            <label for="dwsLightTheme" class="dws-option-label">&nbsp;Light theme</label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="dws-option-header">Process monitor</div>
+        <div class="dws-option-frame">
+          <div class="dws-option">
+            <select id="dws-processmon-end-segm-unit" class="dws-option-select" ng-model="procmonSelectEndUnit"
+              ng-change="changeProcessmonUnits()">
+              <option value="volume">Volume</option>
+              <option value="weight">Weight</option>
+              <option value="package_count">Number of packages</option>
+              <option value="nothing">Nothing</option>
+            </select>
+            <label for="dws-processmon-end-segm-unit" class="dws-option-label">&nbsp;End segment units</label>
+          </div>
+          <div class="dws-option">
+            <select id="dws-processmon-lane-unit" class="dws-option-select" ng-model="procmonSelectLaneUnit"
+              ng-change="changeProcessmonUnits()">
+              <option value="volume">Volume</option>
+              <option value="weight">Weight</option>
+              <option value="package_count">Number of packages</option>
+              <option value="nothing">Nothing</option>
+            </select>
+            <label for="dws-processmon-lane-unit" class="dws-option-label">&nbsp;Lane units</label>
+          </div>
+          <div class="dws-option">
+            <div
+              ng-class="{'dws-simple-button':procmonUnitsChanged, 'dws-simple-button dws-disabled':!procmonUnitsChanged}"
+              ng-click="saveProcessmonUnits()">Save process monitor changes</div>
+          </div>
+          <div class="dws-option" ng-show="enableResetEndsegmStats">
+            <div class="dws-simple-button" ng-click="openClearProcmonConfirmDialog()">Reset process monitor statistics
+            </div>
+          </div>
+          <div class="dws-option" ng-show="enableResetOverallStats">
+            <div class="dws-simple-button" ng-click="openResetAllStatsConfirmDialog()">Reset all runtime statistics
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Reset process monitor statistics yes/no dialog -->
+<div
+  ng-class="{'modal':!showClearProcmonStatsConfirmDialog, 'modal show-modal modal-layer-confirm-dialog':showClearProcmonStatsConfirmDialog}"
+  ng-click="closeClearProcmonConfirmDialog()">
+  <div class="modal-content-confirm-dialog" ng-click="$event.stopPropagation()">
+    <!-- Confirmation text -->
+    <div class="dws-confirm-dialog-text">
+      Are you sure you want to reset process monitor statistics?
+    </div>
+    <!-- Buttons -->
+    <div class="dws-confirm-dialog-button-row">
+      <div class="dws-simple-button" ng-click="clearProcmonStats()">Yes</div>
+      <div class="dws-simple-button" ng-click="closeClearProcmonConfirmDialog()">No</div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset all runtime statistics yes/no dialog -->
+<div
+  ng-class="{'modal':!showResetAllRuntimeStatsConfirmDialog, 'modal show-modal modal-layer-confirm-dialog':showResetAllRuntimeStatsConfirmDialog}"
+  ng-click="closeResetAllStatsConfirmDialog()">
+  <div class="modal-content-confirm-dialog" ng-click="$event.stopPropagation()">
+    <!-- Confirmation text -->
+    <div class="dws-confirm-dialog-text">
+      Are you sure you want to reset all runtime statistics?
+    </div>
+    <!-- Buttons -->
+    <div class="dws-confirm-dialog-button-row">
+      <div class="dws-simple-button" ng-click="resetAllRuntimStats()">Yes</div>
+      <div class="dws-simple-button" ng-click="closeResetAllStatsConfirmDialog()">No</div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm close options dialog without saving  -->
+<div
+  ng-class="{'modal':!showConfirmCloseNoSaveDialog, 'modal show-modal modal-layer-confirm-dialog':showConfirmCloseNoSaveDialog}"
+  ng-click="closeConfirmCloseNoSaveDialog()">
+  <div class="modal-content-confirm-dialog" ng-click="$event.stopPropagation()">
+    <!-- Confirmation text -->
+    <div class="dws-confirm-dialog-text">
+      You have unsaved changes. Proceed without saving?
+    </div>
+    <!-- Buttons -->
+    <div class="dws-confirm-dialog-button-row">
+      <div class="dws-simple-button" ng-click="doConfirmCloseNoSave()">Yes</div>
+      <div class="dws-simple-button" ng-click="doNotConfirmCloseNoSave()">No</div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  (function (scope) {
+    // Pick up scan source to filter for from ?source= and save it to localStorage.filterScanSource
+    const filterScanSource = new URLSearchParams(location.search).get('source')
+    if (filterScanSource) {
+      try {
+        if (filterScanSource == '*') {
+          localStorage.removeItem('filterScanSource')
+        }
+        else {
+          localStorage.setItem('filterScanSource', filterScanSource)
+        }
+      }
+      catch (e) { } // ignore
+    }
+
+    /* Currently selected units for the process monitor */
+    scope.procmonEndSegmentUnit = 'volume';
+    scope.procmonLaneSegmentUnit = 'package_count';
+    /*
+    * Change process monitor units
+    */
+    scope.newProcmonEndSegmentUnit = scope.procmonEndSegmentUnit;
+    scope.newProcmonLaneSegmentUnit = scope.procmonLaneSegmentUnit;
+    scope.procmonUnitsChanged = false;
+    scope.changeProcessmonUnits = () => {
+      scope.newProcmonEndSegmentUnit = document.getElementById('dws-processmon-end-segm-unit').value;
+      scope.newProcmonLaneSegmentUnit = document.getElementById('dws-processmon-lane-unit').value;
+      if (scope.newProcmonEndSegmentUnit !== scope.procmonEndSegmentUnit ||
+        scope.newProcmonLaneSegmentUnit !== scope.procmonLaneSegmentUnit)
+        scope.procmonUnitsChanged = true;
+      else
+        scope.procmonUnitsChanged = false;
+    };
+    scope.saveProcessmonUnits = () => {
+      if (!scope.procmonUnitsChanged)
+        return;
+      let msg = {
+        topic: 'userEvent',
+        payload: {
+          instruction: 'set_procmon_units',
+          value: {
+            endSegmentUnit: scope.newProcmonEndSegmentUnit,
+            laneSegmentUnit: scope.newProcmonLaneSegmentUnit
+          }
+        }
+      };
+      scope.send(msg);
+      scope.procmonEndSegmentUnit = scope.newProcmonEndSegmentUnit;
+      scope.procmonLaneSegmentUnit = scope.newProcmonLaneSegmentUnit;
+      scope.procmonUnitsChanged = false;
+    };
+    /*
+    * Set selected process monitor units
+    */
+    scope.setSelectedProcessmonUnits = () => {
+      document.getElementById('dws-processmon-end-segm-unit').value = scope.procmonEndSegmentUnit;
+      document.getElementById('dws-processmon-lane-unit').value = scope.procmonLaneSegmentUnit;
+      scope.procmonUnitsChanged = false;
+    }
+    scope.setSelectedProcessmonUnits();
+
+
+    /*
+    * Options dialog
+    */
+    scope.showOptionsDialog = false;
+    scope.showOptions = () => {
+    };
+    scope.openOptionsDialog = () => {
+      scope.showOptionsDialog = true;
+    };
+    scope.closeOptionsDialog = (checkChanges = true) => {
+      // Check for config changes
+      if (checkChanges && scope.procmonUnitsChanged)
+        // Save changes?
+        scope.openConfirmCloseNoSaveDialog();
+      else
+        scope.showOptionsDialog = false;
+    };
+
+    /*
+    * Confirm close options dialog without saving
+    */
+    scope.showConfirmCloseNoSaveDialog = false;
+    scope.openConfirmCloseNoSaveDialog = () => {
+      scope.showConfirmCloseNoSaveDialog = true;
+    };
+    scope.closeConfirmCloseNoSaveDialog = () => {
+      scope.showConfirmCloseNoSaveDialog = false;
+    };
+    scope.doConfirmCloseNoSave = () => {
+      scope.setSelectedProcessmonUnits();
+      scope.closeConfirmCloseNoSaveDialog();
+      scope.closeOptionsDialog(false);
+    };
+    scope.doNotConfirmCloseNoSave = () => {
+      scope.closeConfirmCloseNoSaveDialog();
+    };
+
+    /*
+    * Confirm reset process monitor statistics dialog
+    */
+    scope.showClearProcmonStatsConfirmDialog = false;
+    scope.clearProcmonStats = () => {
+      // Send instruction to clear stats
+      let msg = {
+        topic: 'userEvent',
+        payload: {
+          instruction: 'reset_procmon_stats',
+          value: null
+        }
+      };
+      scope.send(msg);
+      scope.closeClearProcmonConfirmDialog();
+    };
+    scope.openClearProcmonConfirmDialog = () => {
+      scope.showClearProcmonStatsConfirmDialog = true;
+    };
+    scope.closeClearProcmonConfirmDialog = () => {
+      scope.showClearProcmonStatsConfirmDialog = false;
+    };
+
+    /*
+    * Confirm reset all runtime statistics dialog
+    */
+    scope.showResetAllRuntimeStatsConfirmDialog = false;
+    scope.resetAllRuntimStats = () => {
+      // Send instruction to reset all runtime stats
+      let msg = {
+        topic: 'userEvent',
+        payload: {
+          instruction: 'reset_stats',
+          value: null
+        }
+      };
+      scope.send(msg);
+      scope.closeResetAllStatsConfirmDialog();
+    };
+    scope.openResetAllStatsConfirmDialog = () => {
+      scope.showResetAllRuntimeStatsConfirmDialog = true;
+    };
+    scope.closeResetAllStatsConfirmDialog = () => {
+      scope.showResetAllRuntimeStatsConfirmDialog = false;
+    };
+
+    /* Current/default theme */
+    scope.currentTheme = 'dark';
+    /*
+     * Check the radio button that corresponds to theme
+     */
+    scope.setSelectedTheme = (theme) => {
+      let dwsThemeRadioBtns = document.getElementsByName('dwsTheme');
+      let noOfBtns = dwsThemeRadioBtns.length;
+      let done = false;
+      for (let i = 0; i < noOfBtns && !done; i++) {
+        if (dwsThemeRadioBtns[i].value === theme) {
+          dwsThemeRadioBtns[i].checked = true;
+          done = true;
+        }
+      }
+    };
+
+    /*
+     * Change theme
+     */
+    scope.selectTheme = () => {
+      // Get the selected option
+      let dwsThemeRadioBtns = document.getElementsByName('dwsTheme');
+      let noOfBtns = dwsThemeRadioBtns.length;
+      let selectedTheme = '';
+      for (let i = 0; i < noOfBtns && !selectedTheme; i++) {
+        if (dwsThemeRadioBtns[i].checked)
+          selectedTheme = dwsThemeRadioBtns[i].value;
+      }
+      if (selectedTheme !== scope.currentTheme) {
+        // An alternate theme has been selected
+        scope.currentTheme = selectedTheme;
+        scope.saveTheme();
+        scope.setTheme(scope.currentTheme);
+      }
+    };
+
+    /*
+    * Set the dashboard theme
+    */
+    scope.setTheme = (theme) => {
+      let root = document.documentElement;
+      if (theme === 'dark') {
+        root.style.setProperty('--dws-container-bg-color', '#333333');
+        root.style.setProperty('--dws-container-border-color', '#333333');
+        root.style.setProperty('--dws-header-color', '#fcfcf8');
+        root.style.setProperty('--dws-text-color', '#fcfcf8');
+        root.style.setProperty('--dws-divider-color', '#d7c77e');
+        /* Data */
+        root.style.setProperty('--dws-good-data-color', '#fcfcf8');
+        root.style.setProperty('--dws-good-data-dimmed-color', '#d7c77e');
+        root.style.setProperty('--dws-bad-data-color', '#ffff00');
+        /* Icon colors */
+        root.style.setProperty('--dws-check-mark-good-color', '#37b332');
+        root.style.setProperty('--dws-check-mark-bad-color', '#ffff00');
+        root.style.setProperty('--dws-check-mark-pending-color', '#737373');
+        /* Tool colors */
+        root.style.setProperty('--dws-tool-button-color', '#fcfcf8');
+        root.style.setProperty('--dws-tool-button-hover-bg-color', '#333333');
+        /* Button colors */
+        root.style.setProperty('--dws-button-color', '#333333');
+        root.style.setProperty('--dws-button-bg-color', '#fcfcf8');
+        root.style.setProperty('--dws-button-hover-bg-color', '#808080');
+        /* Process monitor colors */
+        root.style.setProperty('--dws-procmon-inner-name', '#333333');
+        root.style.setProperty('--dws-procmon-outer-name', '#d7c77e');
+        root.style.setProperty('--dws-procmon-info-txt', '#d7c77e');
+        root.style.setProperty('--dws-procmon-warn-txt', '#ffff00');
+        root.style.setProperty('--dws-procmon-err-txt', '#f62323');
+        root.style.setProperty('--dws-procmon-lane-fill', '#f2f2f2');
+        root.style.setProperty('--dws-scan-stroke-idle', '#f2f2f2');
+        root.style.setProperty('--dws-scan-stroke-active', '#ff0000');
+        root.style.setProperty('--dws-scan-warn-symbol', '#ffff00');
+        root.style.setProperty('--dws-scan-err-symbol', '#f62323');
+        root.style.setProperty('--dws-scan-ok-symbol', '#37b332');
+        root.style.setProperty('--dws-scan-idle-symbol', '#008ae6');
+      } else if (theme === 'light') {
+        root.style.setProperty('--dws-container-bg-color', '#f5f5f5');
+        root.style.setProperty('--dws-container-border-color', '#f5f5f5');
+        root.style.setProperty('--dws-header-color', '#0d0d0d');
+        root.style.setProperty('--dws-text-color', '#0d0d0d');
+        root.style.setProperty('--dws-divider-color', '#62551e');
+        /* Data */
+        root.style.setProperty('--dws-good-data-color', '#0d0d0d');
+        root.style.setProperty('--dws-good-data-dimmed-color', '#62551e');
+        root.style.setProperty('--dws-bad-data-color', '#ff6600');
+        /* Icon colors */
+        root.style.setProperty('--dws-check-mark-good-color', '#37b332');
+        root.style.setProperty('--dws-check-mark-bad-color', '#ff6600');
+        root.style.setProperty('--dws-check-mark-pending-color', '#737373');
+        /* Tool colors */
+        root.style.setProperty('--dws-tool-button-color', '#f5f5f5');
+        root.style.setProperty('--dws-tool-button-hover-bg-color', '#333333');
+        /* Button colors */
+        root.style.setProperty('--dws-button-color', '#f5f5f5');
+        root.style.setProperty('--dws-button-bg-color', '#333333');
+        root.style.setProperty('--dws-button-hover-bg-color', '#666666');
+        /* Process monitor colors */
+        root.style.setProperty('--dws-procmon-inner-name', '#fefefe');
+        root.style.setProperty('--dws-procmon-outer-name', '#62551e');
+        root.style.setProperty('--dws-procmon-info-txt', '#62551e');
+        root.style.setProperty('--dws-procmon-warn-txt', '#ff6600');
+        root.style.setProperty('--dws-procmon-err-txt', '#f62323');
+        root.style.setProperty('--dws-procmon-lane-fill', '#111111');
+        root.style.setProperty('--dws-scan-stroke-idle', '#111111');
+        root.style.setProperty('--dws-scan-stroke-active', '#ff0000');
+        root.style.setProperty('--dws-scan-warn-symbol', '#ff6600');
+        root.style.setProperty('--dws-scan-err-symbol', '#f62323');
+        root.style.setProperty('--dws-scan-ok-symbol', '#37b332');
+        root.style.setProperty('--dws-scan-idle-symbol', '#008ae6');
+      }
+    }
+
+    /*
+    * Save/load the selected theme to/from a cookie
+    */
+    scope.saveTheme = () => {
+      // Set the cookie lifetime to two years. That should be quite sufficient as we intend to refresh the
+      // cookie each time the system is started
+      let exptime = "expires=" + (new Date(Date.now() + 63072000000)).toUTCString();
+      document.cookie = 'dwsColorTheme=' + scope.currentTheme + ';' + exptime + ';path=/' + ';SameSite=Strict';
+    };
+    scope.getTheme = () => {
+      let cookieName = 'dwsColorTheme=';
+      let cookieList = decodeURIComponent(document.cookie).split(';');
+      let noOfCookies = cookieList.length;
+      let thisCookie;
+      let value = '';
+      for (let i = 0; i < noOfCookies && !value; i++) {
+        thisCookie = cookieList[i].trim();
+        if (thisCookie.indexOf(cookieName) == 0)
+          // Got the right cookie - return the value
+          value = thisCookie.substring(cookieName.length);
+      }
+      if (value)
+        scope.currentTheme = value;
+      /* Refresh the cookie/set new one */
+      scope.saveTheme();
+      scope.setSelectedTheme(scope.currentTheme);
+      scope.setTheme(scope.currentTheme);
+    };
+    /* Get and set the initial theme and set radio buttons accordingy */
+    scope.getTheme();
+    scope.setSelectedTheme(scope.currentTheme);
+
+    /*
+    * Enable/disable reset statistics buttons
+    */
+    scope.enableResetEndsegmStats = false;
+    scope.enableResetOverallStats = false;
+
+    /*
+    * The initialized flag tells if the template has been initialized. The template
+    * is considered inintialized when the first data package has been received.
+    */
+    scope.initialized = false;
+
+    /*
+    * Data update/message handler
+    */
+    scope.$watch('msg', (msg) => {
+      if (msg) {
+        // Just a little bit more validation (like any) would be proper to do
+        if (msg.topic === 'uiProcmonConfig') {
+          scope.procmonEndSegmentUnit = (msg.payload.hasOwnProperty('endSegmentUnit') && msg.payload.endSegmentUnit) ? msg.payload.endSegmentUnit : scope.procmonEndSegmentUnit;
+          scope.procmonLaneSegmentUnit = (msg.payload.hasOwnProperty('laneSegmentUnit') && msg.payload.laneSegmentUnit) ? msg.payload.laneSegmentUnit : scope.procmonLaneSegmentUnit;
+          scope.setSelectedProcessmonUnits();
+        } else if (msg.topic === 'uiResetStatsConfig') {
+          scope.enableResetEndsegmStats = (msg.payload.hasOwnProperty('allowResetEndsegmStats') && msg.payload.allowResetEndsegmStats !== null) ? msg.payload.allowResetEndsegmStats : scope.enableResetEndsegmStats;
+          scope.enableResetOverallStats = (msg.payload.hasOwnProperty('allowResetOverallStats') && msg.payload.allowResetOverallStats !== null) ? msg.payload.allowResetOverallStats : scope.enableResetOverallStats;
+        }
+      }
+      // Give the UI some time to settle
+      setTimeout(() => {
+        scope.initialized = true
+      }, 2000);
+    });
+  })(scope);
+
+
+</script>
