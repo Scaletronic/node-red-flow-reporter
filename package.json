@@ -1,7 +1,7 @@
 {
   "name": "node-red-flow-reporter",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Node-RED Flow File Reporter - better version control experience and documentation with Node-RED Flows",
   "main": "dist/index.js",
   "bin": {
     "node-red-flow-reporter": "./dist/index.js"
@@ -11,7 +11,7 @@
     "ts-cli": "ts-node src",
     "build": "tsc"
   },
-  "author": "",
+  "author": "Andreas Markussen <am@scaletronic.dk>",
   "license": "ISC",
   "dependencies": {
     "@node-red/flow-parser": "^1.0.2",
@@ -23,7 +23,6 @@
   "devDependencies": {
     "@types/chai": "^4.3.4",
     "@types/node-red": "^1.2.1",
-    "chai": "^4.3.7",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.7.0",
     "typescript": "^4.3.5"

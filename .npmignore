@@ -1,0 +1,5 @@
+# Exclude all files except 'dist' and 'docs'
+/*
+!/dist/
+!/docs/
+!README.MD

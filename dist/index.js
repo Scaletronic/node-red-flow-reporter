@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -26,10 +27,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const { parseFlow } = require("@node-red/flow-parser");
 const FlowParser = require("@node-red/flow-parser");
-const units_1 = require("./units");
 const fw = __importStar(require("./2_infra/file-writer"));
-const node_extractors_1 = require("./0_domain/node-extractors");
-const formatters_1 = require("./0_domain/formatters");
+const printNodeHeadline_1 = require("./1_app/printNodeHeadline");
+const fileWriteLine = fw.addOutputPart;
+(0, printNodeHeadline_1.setOutputWriter)(fw);
 let fileName = "";
 if (process.argv.length <= 2) {
     console.error("No filename given as argument");
@@ -40,7 +41,6 @@ else if (process.argv.length > 2) {
     console.log(`Filename given \n\t${fileName}`);
     console.log("File size " + fs.statSync(fileName).size);
 }
-const fileWriteLine = fw.addOutputPart;
 // Load the flow json from a local file and parse to an object
 // const exampleFlow = JSON.parse(fs.readFileSync("scripts-dev/flow-report-ts/test_data/test-01.json", "utf-8"));
 const exampleFlow = JSON.parse(fs.readFileSync(fileName, "utf-8"));
@@ -72,33 +72,11 @@ flow.walk(function (obj) {
             break;
     }
 });
-function printNodeHeadline(nodes) {
-    const configHeadlines = (0, node_extractors_1.extractConfigHeaders)(nodes);
-    const nodeHeadlines = ['name', ...configHeadlines, ...(0, node_extractors_1.extractHeaders)(nodes)];
-    fileWriteLine(nodeHeadlines.map(units_1.prettyFromCamelCase).join(" | "));
-    fileWriteLine(nodeHeadlines.map(a => '-----').join("|"));
-    const sortedNodes = nodes.sort((a, b) => a.config['name'].localeCompare(b.config['name']));
-    sortedNodes.forEach(node => {
-        const lineParts = [];
-        nodeHeadlines.forEach(headline => {
-            if (node[headline]) {
-                lineParts.push((0, formatters_1.formatNodeInformation)(nodes, node, headline));
-            }
-            else if (node.config[headline]) {
-                lineParts.push((0, formatters_1.formatNodeInformation)(nodes, node.config, headline));
-            }
-            else {
-                lineParts.push('&nbsp;');
-            }
-        });
-        fileWriteLine(lineParts.join(" | "));
-    });
-}
 function printNodes(nodes) {
     const nodeNames = Object.keys(nodes).sort((a, b) => a.localeCompare(b));
     nodeNames.forEach(nodeName => {
         fileWriteLine(`## Node type '${nodeName}' is used ${nodes[nodeName].length} times`);
-        printNodeHeadline(nodes[nodeName]);
+        (0, printNodeHeadline_1.printNodeHeadline)(nodes[nodeName], nodes);
         fileWriteLine("\n");
     });
 }

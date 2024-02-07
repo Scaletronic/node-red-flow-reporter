@@ -11,8 +11,12 @@ let fwObj: OutputWriter | undefined = undefined;
 export function setOutputWriter(fw: OutputWriter) {
   fwObj = fw  
 }
-
-export function printNodeHeadline(nodes: any[], allNodes: NodesType) {
+/**
+ * 
+ * @param nodes Nodes to format
+ * @param allNodes Array of all nodes, to use for look up of names
+ */
+export function printNodeHeadline(nodes: any[], allNodes: NodesType, allNodes: NodesType): void {
   console.log("printNodeHeadline - old code - to be replaced when V2 is the standard")
   if (fwObj === undefined) throw new Error("Please set the output writer")
   const fileWriteLine = fwObj.addOutputPart
