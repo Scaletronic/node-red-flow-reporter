@@ -1,25 +1,44 @@
 #! /usr/bin/env node
+import { Option, program } from 'commander';
 const fs = require("fs");
 const { parseFlow } = require("@node-red/flow-parser");
 const FlowParser = require("@node-red/flow-parser");
 
 import * as fw from "./2_infra/file-writer"
-import { printNodeHeadline, setOutputWriter } from "./1_app/printNodeHeadline";
+import { printNodeHeadline, printNodeHeadlineNewMarkdown, setOutputWriter } from "./1_app/printNodeHeadline";
+import { NodesType } from "./0_domain/NodesType";
 
 const fileWriteLine = fw.addOutputPart
 setOutputWriter(fw)
 
+program
+  .name('flow-reporter')
+  .argument('<file>', 'input file name')
+  .option('-V', '--setVersion <type>', '1')
+  // .addOption(new Option('-f, --file <type>', 'input file name'))
+  //.option('-f, --file <type>', 'input file name')
+  .parse(process.argv);
+
+const options = program.opts();
+const args = program.args;
+console.log("args", args);
+console.log("options", options);
 let fileName: string = "";
-if (process.argv.length <= 2) {
-  console.error("No filename given as argument");
-  process.exit(1)
-} else if (process.argv.length > 2) {
-  fileName = process.argv[2];
+let setVersion: string = "";
+if (options.V) {
+  if (options.V === true) setVersion = "2";
+  else setVersion = options.V.toString();
+  console.log(`Version set to \n\t${setVersion}`);
+}
+if (args.length > 0) {
+  fileName = args[0];
   console.log(`Filename given \n\t${fileName}`);
   console.log("File size " + fs.statSync(fileName).size)
 }
-
-
+else{
+  console.error("No filename given as argument");
+  process.exit(1)
+} 
 
 // Load the flow json from a local file and parse to an object
 // const exampleFlow = JSON.parse(fs.readFileSync("scripts-dev/flow-report-ts/test_data/test-01.json", "utf-8"));
@@ -29,9 +48,6 @@ fileWriteLine("# Flow Report")
 fileWriteLine(`Filename: ${fileName}`)
 fileWriteLine("")
 const flow = parseFlow(exampleFlow);
-type SimilarNodeList = any[]
-type NodesType = Record<string, any>
-
 const nodes: NodesType = []
 
 flow.walk(function (obj: any) {
@@ -60,10 +76,20 @@ flow.walk(function (obj: any) {
 
 
 function printNodes(nodes: NodesType): void {
+  console.log("setVersion", setVersion)
   const nodeNames = Object.keys(nodes).sort((a, b) => a.localeCompare(b))
   nodeNames.forEach(nodeName => {
     fileWriteLine(`## Node type '${nodeName}' is used ${nodes[nodeName].length} times`)
-    printNodeHeadline(nodes[nodeName])
+    if(setVersion === "1"){
+      printNodeHeadline(nodes[nodeName], nodes)
+    } else if (setVersion === "2" ) {
+      printNodeHeadlineNewMarkdown(nodes[nodeName], nodes)
+    }
+    else {
+      printNodeHeadline(nodes[nodeName], nodes)
+    }
+
+
     fileWriteLine("\n")
   })
 }
