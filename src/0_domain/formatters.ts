@@ -1,24 +1,22 @@
-export function formatNodeInformation(nodes: Record<string, any>, node: any, headline: string): String {
-  let value = node[headline] // actually 'inboundWires'
+import { OutputWriter } from "./OutputWriter.interface";
+
+export function formatNodeInformation(nodes: Record<string, any>, node: any, headline: string, allNodes: Record<string, any>): String {
+  let value = node[headline] 
   if (value === undefined) return '(undef)'
-  if (value.length > 80) {
-    value = String(value).replace(/(?:\r\n|\r|\n)/g, '<br/>')
-    return ((new String(value)).slice(0, 20) + `..(Cropped. Length ${value.length})`)
-  }
+
   switch (headline) {
-    case 'tab':
-      {
-        const ioConnectNodes = nodes['ui_tab']
-        const ioConnectNodeIndex = ioConnectNodes.findIndex((node: any) => node.id == value)
-        if (ioConnectNodeIndex > -1) return ioConnectNodes[ioConnectNodeIndex].config.name;
-        break;
-      }
-    case 'ioConnect': {
-      const ioConnectNodes = nodes['ioConnect']
-      const ioConnectNodeIndex = ioConnectNodes.findIndex((node: any) => node.id == value)
-      if (ioConnectNodeIndex > -1) return ioConnectNodes[ioConnectNodeIndex].config.name;
-      break;
+    case 'group': {
+      return (value.config.name ? value.config.name : 'Anonymous Group ' + value.id);
     }
+    case 'ui_tab':
+    case 'ioConnect':       
+      {
+        const otherTypeNodes = allNodes[headline]
+        if(otherTypeNodes === undefined) return 'Bad reference: ' + JSON.stringify(value,undefined,"&nbsp;")
+        const otherTypeNodeIndex = otherTypeNodes.findIndex((node: any) => node.id == value)
+        if (otherTypeNodeIndex > -1) return otherTypeNodes[otherTypeNodeIndex].config.name;
+        return 'Not found';
+      }
     case 'outboundWires': {
       if (value.length == 0) return value
       const wire1 = value.pop()
@@ -31,6 +29,8 @@ export function formatNodeInformation(nodes: Record<string, any>, node: any, hea
       const source = wire1.sourceNode
       return `${source.type}: ${source.config.name} `
     }
+    case 'theme':
+    case 'site': 
     case 'func':
     case 'props': {
       const jsonStr = JSON.stringify(value,undefined," ")
