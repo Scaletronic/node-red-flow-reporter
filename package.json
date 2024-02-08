@@ -1,8 +1,13 @@
 {
   "name": "node-red-flow-reporter",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "Node-RED Flow File Reporter - better version control experience and documentation with Node-RED Flows",
   "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Scaletronic/node-red-flow-reporter.git"
+  },
+  "homepage": "https://github.com/Scaletronic/node-red-flow-reporter?tab=readme-ov-file#node-red---flow-report",
   "bin": {
     "node-red-flow-reporter": "./dist/index.js"
   },
