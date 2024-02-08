@@ -24,6 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const commander_1 = require("commander");
 const fs = require("fs");
 const { parseFlow } = require("@node-red/flow-parser");
 const FlowParser = require("@node-red/flow-parser");
@@ -31,15 +32,34 @@ const fw = __importStar(require("./2_infra/file-writer"));
 const printNodeHeadline_1 = require("./1_app/printNodeHeadline");
 const fileWriteLine = fw.addOutputPart;
 (0, printNodeHeadline_1.setOutputWriter)(fw);
+commander_1.program
+    .name('flow-reporter')
+    .argument('<file>', 'input file name')
+    .option('-V', '--setVersion <type>', '1')
+    // .addOption(new Option('-f, --file <type>', 'input file name'))
+    //.option('-f, --file <type>', 'input file name')
+    .parse(process.argv);
+const options = commander_1.program.opts();
+const args = commander_1.program.args;
+console.log("args", args);
+console.log("options", options);
 let fileName = "";
-if (process.argv.length <= 2) {
-    console.error("No filename given as argument");
-    process.exit(1);
+let setVersion = "";
+if (options.V) {
+    if (options.V === true)
+        setVersion = "2";
+    else
+        setVersion = options.V.toString();
+    console.log(`Version set to \n\t${setVersion}`);
 }
-else if (process.argv.length > 2) {
-    fileName = process.argv[2];
+if (args.length > 0) {
+    fileName = args[0];
     console.log(`Filename given \n\t${fileName}`);
     console.log("File size " + fs.statSync(fileName).size);
+}
+else {
+    console.error("No filename given as argument");
+    process.exit(1);
 }
 // Load the flow json from a local file and parse to an object
 // const exampleFlow = JSON.parse(fs.readFileSync("scripts-dev/flow-report-ts/test_data/test-01.json", "utf-8"));
@@ -73,10 +93,19 @@ flow.walk(function (obj) {
     }
 });
 function printNodes(nodes) {
+    console.log("setVersion", setVersion);
     const nodeNames = Object.keys(nodes).sort((a, b) => a.localeCompare(b));
     nodeNames.forEach(nodeName => {
         fileWriteLine(`## Node type '${nodeName}' is used ${nodes[nodeName].length} times`);
-        (0, printNodeHeadline_1.printNodeHeadline)(nodes[nodeName], nodes);
+        if (setVersion === "1") {
+            (0, printNodeHeadline_1.printNodeHeadline)(nodes[nodeName], nodes);
+        }
+        else if (setVersion === "2") {
+            (0, printNodeHeadline_1.printNodeHeadlineNewMarkdown)(nodes[nodeName], nodes);
+        }
+        else {
+            (0, printNodeHeadline_1.printNodeHeadline)(nodes[nodeName], nodes);
+        }
         fileWriteLine("\n");
     });
 }

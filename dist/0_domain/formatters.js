@@ -1,30 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatNodeInformation = void 0;
-function formatNodeInformation(nodes, node, headline) {
-    let value = node[headline]; // actually 'inboundWires'
+function formatNodeInformation(nodes, node, headline, allNodes) {
+    var _a;
+    let value = node[headline];
     if (value === undefined)
         return '(undef)';
-    if (value.length > 80) {
-        value = String(value).replace(/(?:\r\n|\r|\n)/g, '<br/>');
-        return ((new String(value)).slice(0, 20) + `..(Cropped. Length ${value.length})`);
-    }
     switch (headline) {
-        case 'tab':
-            {
-                const ioConnectNodes = nodes['ui_tab'];
-                const ioConnectNodeIndex = ioConnectNodes.findIndex((node) => node.id == value);
-                if (ioConnectNodeIndex > -1)
-                    return ioConnectNodes[ioConnectNodeIndex].config.name;
-                break;
-            }
-        case 'ioConnect': {
-            const ioConnectNodes = nodes['ioConnect'];
-            const ioConnectNodeIndex = ioConnectNodes.findIndex((node) => node.id == value);
-            if (ioConnectNodeIndex > -1)
-                return ioConnectNodes[ioConnectNodeIndex].config.name;
-            break;
+        case 'group': {
+            return (((_a = value.config) === null || _a === void 0 ? void 0 : _a.name) ? value.config.name : 'Anonymous Group ' + value.id);
         }
+        case 'ui_tab':
+        case 'ioConnect':
+            {
+                const otherTypeNodes = allNodes[headline];
+                if (otherTypeNodes === undefined)
+                    return 'Bad reference: ' + JSON.stringify(value, undefined, "&nbsp;");
+                const otherTypeNodeIndex = otherTypeNodes.findIndex((node) => node.id == value);
+                if (otherTypeNodeIndex > -1)
+                    return otherTypeNodes[otherTypeNodeIndex].config.name;
+                return 'Not found';
+            }
         case 'outboundWires': {
             if (value.length == 0)
                 return value;
@@ -39,6 +35,8 @@ function formatNodeInformation(nodes, node, headline) {
             const source = wire1.sourceNode;
             return `${source.type}: ${source.config.name} `;
         }
+        case 'theme':
+        case 'site':
         case 'func':
         case 'props': {
             const jsonStr = JSON.stringify(value, undefined, " ");

@@ -6,7 +6,7 @@ export function formatNodeInformation(nodes: Record<string, any>, node: any, hea
 
   switch (headline) {
     case 'group': {
-      return (value.config.name ? value.config.name : 'Anonymous Group ' + value.id);
+      return (value.config?.name ? value.config.name : 'Anonymous Group ' + value.id);
     }
     case 'ui_tab':
     case 'ioConnect':       

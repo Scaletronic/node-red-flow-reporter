@@ -1,0 +1,755 @@
+<script type="text/javascript" src="/scripts/gauge.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/scaletronic-dws.css"/>
+<div class="dws-rounded-status-box">
+
+  <div class="dws-status-log-latest-container">
+	  <!-- When the template has not been initialized -->
+    <div ng-show="!initialized" class="dws-status-log-row dws-status-log-row-latest">
+      <div class="dws-status-log-time">&nbsp;</div>
+      <div class="package-status-log-id">&nbsp;</div>
+      <div class="package-status-log-flag dws-check-mark-pending"></div>
+      <div class="package-status-log-flag dws-check-mark-pending"></div>
+      <div class="package-status-log-flag dws-check-mark-pending"></div>
+      <div class="package-status-log-flag dws-check-mark-pending"></div>
+	  <div class="package-status-log-sortlane dws-good-data">&nbsp;</div>
+	  <div class="package-status-log-text dws-good-data">&nbsp;</div>
+    </div>
+	  <!-- And when the template has been initialized -->
+    <div ng-show="initialized" class="dws-status-log-row dws-status-log-row-latest" ng-click="showLogDetails(-1)">
+      <div class="dws-status-log-time">{{ dataObject.scanTime }}</div>
+      <div class="package-status-log-id" ng-show="dataObject.packageIds.ids.length" >{{ dataObject.packageIds.ids[0] }}</div>
+      <div ng-show="!dataObject.hasData || !dataObject.isDataError" ng-class="{'package-status-log-flag dws-check-mark-good':dataObject.hasData, 'package-status-log-flag dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+	  <div ng-show="dataObject.hasData && dataObject.isDataError" class="package-status-log-flag dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'package-status-log-flag dws-check-mark-bad':(dataObject.hasData && dataObject.completion.sorting.error), 'package-status-log-flag dws-check-mark-good':(dataObject.hasData && dataObject.completion.sorting.isSorted && !dataObject.completion.sorting.error), 'package-status-log-flag dws-check-mark-pending':(!dataObject.hasData || (!dataObject.completion.sorting.isSorted && !dataObject.completion.sorting.error))}"><i class="fa fa-random"></i></div>
+    <!--
+    <div ng-class="{'package-status-log-flag dws-check-mark-bad':(dataObject.hasData && dataObject.completion.datatransfer.error), 'package-status-log-flag dws-check-mark-good':(dataObject.hasData && dataObject.completion.datatransfer.isTransferred && !dataObject.completion.datatransfer.error), 'package-status-log-flag dws-check-mark-pending':(!dataObject.hasData || (!dataObject.completion.datatransfer.isTransferred && !dataObject.completion.datatransfer.error))}"><i class="fa fa-paper-plane"></i></div>
+    -->
+    <!--
+    <div ng-class="{'package-status-log-flag dws-check-mark-bad':(dataObject.hasData && dataObject.completion.imagetransfer.error), 'package-status-log-flag dws-check-mark-good':(dataObject.hasData && dataObject.completion.imagetransfer.isTransferred && !dataObject.completion.imagetransfer.error), 'package-status-log-flag dws-check-mark-pending':(!dataObject.hasData || (!dataObject.completion.imagetransfer.isTransferred && !dataObject.completion.imagetransfer.error))}"><i class="fa fa-camera"></i></div>
+    -->
+	  <div ng-class="{'package-status-log-sortlane dws-good-data':(!dataObject.hasData || !dataObject.completion.sorting.error && dataObject.sorting.good), 'package-status-log-sortlane dws-bad-data':(dataObject.hasData && (dataObject.completion.sorting.error || !dataObject.sorting.good))}">{{ dataObject.sorting.sortPath }}</div>
+    <div ng-class="{'package-status-log-text dws-good-data':(!dataObject.hasData || !dataObject.isDataError), 'package-status-log-text dws-bad-data':(dataObject.hasData && dataObject.isDataError)}">{{ dataObject.statusTxt.short }}</div>
+    </div>
+  </div>
+  <!-- Log list -->
+  <div class="dws-status-log-list-container">
+    <div class="dws-scrollable-log">
+      <div class="dws-status-log-row" ng-repeat="logObj in logList track by logObj.corrId" ng-click="showLogDetails($index)">
+		  <div class="dws-status-log-time">{{ logObj.scanTime }}</div>
+		  <div class="package-status-log-id" ng-show="logObj.packageIds.ids.length" >{{ logObj.packageIds.ids[0] }}</div>
+		  <div ng-show="!logObj.isDataError" class="package-status-log-flag dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="logObj.isDataError" class="package-status-log-flag dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'package-status-log-flag dws-check-mark-bad':logObj.completion.sorting.error, 'package-status-log-flag dws-check-mark-good':logObj.completion.sorting.isSorted, 'package-status-log-flag dws-check-mark-pending':(!logObj.completion.sorting.isSorted && !logObj.completion.sorting.error)}"><i class="fa fa-random"></i></div>
+      <!--
+		  <div ng-class="{'package-status-log-flag dws-check-mark-bad':logObj.completion.datatransfer.error, 'package-status-log-flag dws-check-mark-good':logObj.completion.datatransfer.isTransferred, 'package-status-log-flag dws-check-mark-pending':(!logObj.completion.datatransfer.isTransferred && !logObj.completion.datatransfer.error)}"><i class="fa fa-paper-plane"></i></div>
+      -->
+      <!--
+		  <div ng-class="{'package-status-log-flag dws-check-mark-bad':logObj.completion.imagetransfer.error, 'package-status-log-flag dws-check-mark-good':logObj.completion.imagetransfer.isTransferred, 'package-status-log-flag dws-check-mark-pending':(!logObj.completion.imagetransfer.isTransferred && !logObj.completion.imagetransfer.error)}"><i class="fa fa-camera"></i></div>
+      -->
+      <div ng-class="{'package-status-log-sortlane':(!logObj.completion.sorting.error && logObj.sorting.good), 'package-status-log-sortlane dws-bad-data':(logObj.completion.sorting.error || !logObj.sorting.good)}">{{ logObj.sorting.sortPath }}</div>
+		  <div ng-class="{'package-status-log-text':!logObj.isDataError, 'package-status-log-text dws-bad-data':logObj.isDataError}">{{ logObj.statusTxt.short }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statisics -->
+  <div class="dws-statistics-group">
+    <div class="dws-gauge-box">
+	  <div class="dws-statistics-header">{{ dataHeaders.statistics.throughput }}</div>
+      <div class="gauge-wrapper">
+        <div id="dws-stats-throughput" class="gauge-container"></div>
+      </div>
+	</div>
+    <div class="dws-gauge-box" style="display:none;">
+	  <div class="dws-statistics-header">{{ dataHeaders.statistics.errorRate }}</div>
+      <div class="gauge-wrapper">
+        <div id="dws-stats-error-rate" class="gauge-container"></div>
+	  </div>
+    </div>
+    <div class="dws-statistics-box">
+	  <div class="dws-statistics-header">{{ dataHeaders.statistics.lastReset }}</div>
+	  <div class="dws-statistics-data">{{ statistics.lastResetTime }}</div>
+	  <div class="dws-statistics-header dws-statistics-data-spacer">{{ dataHeaders.statistics.firstPackage }}</div>
+	  <div class="dws-statistics-data">{{ statistics.firstPackageTime }}</div>
+    </div>
+    <div class="dws-statistics-box">
+	  <div class="dws-statistics-header">{{ dataHeaders.statistics.totalPackages }}</div>
+	  <div class="dws-statistics-data">{{ statistics.noOfPackages }}</div>
+	  <div class="dws-statistics-header dws-statistics-data-spacer">{{ dataHeaders.statistics.errorPackages }}</div>
+	  <div class="dws-statistics-data">{{ statistics.noOfBadPackages }}</div>
+    </div>
+    <div class="dws-statistics-box">
+	  <div class="dws-statistics-header">{{ dataHeaders.statistics.avgPerHour }}</div>
+	  <div class="dws-statistics-data">{{ statistics.avgPackagesPerHour }}</div>
+	  <div style="display:none;" class="dws-statistics-header dws-statistics-data-spacer">{{ dataHeaders.statistics.avgErrorRate }}</div>
+	  <div style="display:none;" class="dws-statistics-data">{{ statistics.errorRate }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Log details dialog -->
+<div ng-class="{'modal':!showLogDetailsDialog, 'modal show-modal modal-layer-log-detail':showLogDetailsDialog}" ng-click="closeLogDetailsDialog()">
+  <div class="modal-content-log-detail" ng-click="$event.stopPropagation()">
+    <span class="close-button" ng-click="closeLogDetailsDialog()">&times;</span>
+    <span class="updown-button" ng-click="nextLogDetails()">&or;</span>
+    <span class="updown-button" ng-click="prevLogDetails()">&and;</span>
+    <span class="package-status-log-pkg-internal">({{ detailLogObj.scanSource }} / {{ detailLogObj.corrId }})</span>
+	<!-- Top bar - date, time and flags -->
+	<div class="dws-log-details-header-row">
+	  <div class="dws-status-log-time">{{ detailLogObj.scanDate }} {{ detailLogObj.scanTime }}</div>
+    <div ng-show="!detailLogObj.isDataError" class="package-status-log-flag dws-check-mark-good"><i class="fa fa-check"></i></div>
+	  <div ng-show="detailLogObj.isDataError" class="package-status-log-flag dws-check-mark-bad"><i class="fa fa-close"></i></div>
+	  <div ng-class="{'package-status-log-flag dws-check-mark-bad':detailLogObj.completion.sorting.error, 'package-status-log-flag dws-check-mark-good':(detailLogObj.completion.sorting.isSorted && !detailLogObj.completion.sorting.error), 'package-status-log-flag dws-check-mark-pending':(!detailLogObj.completion.sorting.isSorted && !detailLogObj.completion.sorting.error)}"><i class="fa fa-random"></i></div>
+    <!--
+    <div ng-class="{'package-status-log-flag dws-check-mark-bad':detailLogObj.completion.datatransfer.error, 'package-status-log-flag dws-check-mark-good':(detailLogObj.completion.datatransfer.isTransferred && !detailLogObj.completion.datatransfer.error), 'package-status-log-flag dws-check-mark-pending':(!detailLogObj.completion.datatransfer.isTransferred && !detailLogObj.completion.datatransfer.error)}"><i class="fa fa-paper-plane"></i></div>
+    -->
+    <!--
+    <div ng-class="{'package-status-log-flag dws-check-mark-bad':detailLogObj.completion.imagetransfer.error, 'package-status-log-flag dws-check-mark-good':(detailLogObj.completion.imagetransfer.isTransferred && !detailLogObj.completion.imagetransfer.error), 'package-status-log-flag dws-check-mark-pending':(!detailLogObj.completion.imagetransfer.isTransferred && !detailLogObj.completion.imagetransfer.error)}"><i class="fa fa-camera"></i></div>
+    -->
+	</div>
+
+	<!-- Package codes and sort lane -->
+	<div class="dws-log-details-row dws-log-details-row-border">
+	  <div ng-if="dataHeaders.packageCodes.noOfCodes > 0">
+		<div class="dws-data-header">{{ dataHeaders.packageCodes.headers[0] }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.packageIds.good[0] && detailLogObj.packageIds.ids[0]" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.packageIds.good[0] && detailLogObj.packageIds.ids[0]" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'package-code-data-log dws-good-data':detailLogObj.packageIds.good[0], 'package-code-data-log dws-bad-data':!detailLogObj.packageIds.good[0]}">{{ detailLogObj.packageIds.ids[0] }}</div>
+		</div>
+	  </div>
+	  <div ng-if="dataHeaders.packageCodes.noOfCodes > 1">
+		<div class="dws-data-header">{{ dataHeaders.packageCodes.headers[1] }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.packageIds.good[1] && detailLogObj.packageIds.ids[1]" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.packageIds.good[1] && detailLogObj.packageIds.ids[1]" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'package-code-data-log dws-good-data':detailLogObj.packageIds.good[1], 'package-code-data-log dws-bad-data':!detailLogObj.packageIds.good[1]}">{{ detailLogObj.packageIds.ids[1] }}</div>
+		</div>
+	  </div>
+	  <div ng-if="dataHeaders.packageCodes.noOfCodes > 2">
+		<div class="dws-data-header">{{ dataHeaders.packageCodes.headers[2] }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.packageIds.good[2] && detailLogObj.packageIds.ids[2]" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.packageIds.good[2] && detailLogObj.packageIds.ids[2]" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'package-code-data-log dws-good-data':detailLogObj.packageIds.good[2], 'package-code-data-log dws-bad-data':!detailLogObj.packageIds.good[2]}">{{ detailLogObj.packageIds.ids[2] }}</div>
+		</div>
+	  </div>
+	  <div>
+	  <div class="dws-data-header">{{ dataHeaders.sorting.header }}</div>
+	    <div class="dws-data-frame">
+		  <div ng-show="detailLogObj.sorting.good && detailLogObj.sorting.sortPath" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.sorting.good && detailLogObj.sorting.sortPath" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'sort-path-data-log dws-good-data':detailLogObj.sorting.good, 'sort-path-data-log dws-bad-data':!detailLogObj.sorting.good}">{{detailLogObj.sorting.sortPath }}</div>
+		</div>
+	  </div>
+	</div>
+
+	<!-- Sorting and transfer status texts and timestamps - if present -->
+	<div ng-show="(detailLogObj.statusTxt.full || detailLogObj.completion.sorting.statusTxt || detailLogObj.completion.datatransfer.statusTxt)" class="dws-log-details-row-border">
+	  <!-- Data error - if present -->
+	  <div class="dws-log-details-row" ng-show="detailLogObj.statusTxt.full">
+	    <div>
+	      <div class="dws-data-header">{{ dataHeaders.status.error }}</div>
+	      <div class="dws-data-frame">
+		      <div class="dws-check-mark-log dws-check-mark-bad"><i class="fa fa-close"></i></div>
+	        <div class="dws-status-log-err-text-dialog">{{ detailLogObj.statusTxt.full }}</div>
+	      </div>
+	    </div>
+	  </div>
+	  <!-- Sorting status - if present -->
+	  <div class="dws-log-details-row" ng-show="detailLogObj.completion.sorting.statusTxt">
+	    <div>
+	      <div class="dws-data-header">{{ dataHeaders.status.sorting }}</div>
+	      <div class="dws-data-frame">
+		    <div ng-class="{'dws-check-mark-log dws-check-mark-bad':detailLogObj.completion.sorting.error, 'dws-check-mark-log dws-check-mark-good':(detailLogObj.completion.sorting.isSorted && !detailLogObj.completion.sorting.error), 'dws-check-mark-log dws-check-mark-pending':(!detailLogObj.completion.sorting.isSorted && !detailLogObj.completion.sorting.error)}"><i class="fa fa-random"></i></div>
+	        <div ng-show="!detailLogObj.completion.sorting.error" class="dws-status-log-text-dialog">{{ detailLogObj.completion.sorting.statusTxt }}, {{ detailLogObj.completion.sorting.timestamp }}</div>
+	        <div ng-show="detailLogObj.completion.sorting.error" class="dws-status-log-text-dialog dws-bad-data">{{ detailLogObj.completion.sorting.statusTxt }}</div>
+	      </div>
+  	    </div>
+	  </div>
+	  <!-- Data transfer status - if present -->
+	  <div class="dws-log-details-row" ng-show="detailLogObj.completion.datatransfer.statusTxt">
+	    <div>
+	      <div class="dws-data-header">{{ dataHeaders.status.datatransfer }}</div>
+	      <div class="dws-data-frame">
+		    <div ng-class="{'dws-check-mark-log dws-check-mark-bad':detailLogObj.completion.datatransfer.error, 'dws-check-mark-log dws-check-mark-good':(detailLogObj.completion.datatransfer.isTransferred && !detailLogObj.completion.datatransfer.error), 'dws-check-mark-log dws-check-mark-pending':(!detailLogObj.completion.datatransfer.isTransferred && !detailLogObj.completion.datatransfer.error)}"><i class="fa fa-paper-plane"></i></div>
+	        <div ng-show="!detailLogObj.completion.datatransfer.error" class="dws-status-log-text-dialog">{{ detailLogObj.completion.datatransfer.statusTxt }}, {{ detailLogObj.completion.datatransfer.timestamp }}</div>
+	        <div ng-show="detailLogObj.completion.datatransfer.error" class="dws-status-log-text-dialog dws-bad-data">{{ detailLogObj.completion.datatransfer.statusTxt }}</div>
+	      </div>
+	    </div>
+    </div>
+	  <!-- Image transfer status - if present -->
+	  <div class="dws-log-details-row" ng-show="detailLogObj.completion.imagetransfer.statusTxt">
+	    <div>
+	      <div class="dws-data-header">{{ dataHeaders.status.imagetransfer }}</div>
+	      <div class="dws-data-frame">
+		    <div ng-class="{'dws-check-mark-log dws-check-mark-bad':detailLogObj.completion.imagetransfer.error, 'dws-check-mark-log dws-check-mark-good':(detailLogObj.completion.imagetransfer.isTransferred && !detailLogObj.completion.imagetransfer.error), 'dws-check-mark-log dws-check-mark-pending':(!detailLogObj.completion.imagetransfer.isTransferred && !detailLogObj.completion.imagetransfer.error)}"><i class="fa fa-camera"></i></div>
+	        <div ng-show="!detailLogObj.completion.imagetransfer.error" class="dws-status-log-text-dialog">{{ detailLogObj.completion.imagetransfer.statusTxt }}, {{ detailLogObj.completion.imagetransfer.timestamp }}</div>
+	        <div ng-show="detailLogObj.completion.imagetransfer.error" class="dws-status-log-text-dialog dws-bad-data">{{ detailLogObj.completion.imagetransfer.statusTxt }}</div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<!-- Package data -->
+	<div class="dws-log-details-row dws-log-details-row-border">
+      <div>
+	    <div class="dws-data-header">{{ dataHeaders.dimensions.lengthHeader }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.dimensions.lengthIsGood && detailLogObj.dimensions.length" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.dimensions.lengthIsGood && detailLogObj.dimensions.length" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'dws-data-log dws-good-data':detailLogObj.dimensions.lengthIsGood, 'dws-data-log dws-bad-data':!detailLogObj.dimensions.lengthIsGood}">{{ detailLogObj.dimensions.length }}</div>
+		  <div class="dws-unit-log">{{ dataHeaders.units.dimension }}</div>
+		</div>
+		<div class="dws-data-header">{{ dataHeaders.dimensions.widthHeader }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.dimensions.widthIsGood && detailLogObj.dimensions.width" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.dimensions.widthIsGood && detailLogObj.dimensions.width" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'dws-data-log dws-good-data':detailLogObj.dimensions.widthIsGood, 'dws-data-log dws-bad-data':!detailLogObj.dimensions.widthIsGood}">{{ detailLogObj.dimensions.width }}</div>
+		  <div class="dws-unit-log">{{ dataHeaders.units.dimension }}</div>
+		</div>
+	  </div>
+	  <div>
+		<div class="dws-data-header">{{ dataHeaders.dimensions.heightHeader }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.dimensions.heightIsGood && detailLogObj.dimensions.height" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.dimensions.heightIsGood && detailLogObj.dimensions.height" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'dws-data-log dws-good-data':detailLogObj.dimensions.heightIsGood, 'dws-data-log dws-bad-data':!detailLogObj.dimensions.heightIsGood}">{{ detailLogObj.dimensions.height }}</div>
+		  <div class="dws-unit-log">{{ dataHeaders.units.dimension }}</div>
+		</div>
+		<div class="dws-data-header">{{ dataHeaders.dimensions.volumeHeader }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.dimensions.volumeIsGood && detailLogObj.dimensions.volume" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.dimensions.volumeIsGood && detailLogObj.dimensions.volume" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'dws-data-log dws-good-data':detailLogObj.dimensions.volumeIsGood, 'dws-data-log dws-bad-data':!detailLogObj.dimensions.volumeIsGood}">{{ detailLogObj.dimensions.volume }}</div>
+		  <div class="dws-unit-log">{{ dataHeaders.units.volume }}</div>
+		</div>
+	  </div>
+	  <div>
+		<div class="dws-data-header">{{ dataHeaders.weight.weightHeader }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.weight.weightIsGood && detailLogObj.weight.weight" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.weight.weightIsGood && detailLogObj.weight.weight" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'dws-data-log dws-good-data':detailLogObj.weight.weightIsGood, 'dws-data-log dws-bad-data':!detailLogObj.weight.weightIsGood}">{{ detailLogObj.weight.weight }}</div>
+		  <div class="dws-unit-log">{{ dataHeaders.units.weight }}</div>
+		</div>
+		<div class="dws-data-header">{{ dataHeaders.weight.volWeightHeader }}</div>
+		<div class="dws-data-frame">
+		  <div ng-show="detailLogObj.weight.volumeWeightIsGood && detailLogObj.weight.volumeWeight" class="dws-check-mark-log dws-check-mark-good"><i class="fa fa-check"></i></div>
+		  <div ng-show="!detailLogObj.weight.volumeWeightIsGood && detailLogObj.weight.volumeWeight" class="dws-check-mark-log  dws-check-mark-bad"><i class="fa fa-close"></i></div>
+		  <div ng-class="{'dws-data-log dws-good-data':detailLogObj.weight.volumeWeightIsGood, 'dws-data-log dws-bad-data':!detailLogObj.weight.volumeWeightIsGood}">{{ detailLogObj.weight.volumeWeight }}</div>
+		  <div class="dws-unit-log">{{ dataHeaders.units.weight }}</div>
+		</div>
+      </div>
+	</div>
+
+    <!-- Images -->
+    <div class="dws-log-image-row dws-log-details-row-border">
+      <!-- Image 1 - if available -->
+      <div class="dws-image-frame" ng-show="detailLogObj.images.noOfImages" ng-click="showLargeImage(0)">
+        <img ng-src="{{ detailLogObj.images.images[0] }}" class="dws-image" />
+      </div>
+      <!-- Image 2 - if available -->
+      <div class="dws-image-frame" ng-show="detailLogObj.images.noOfImages > 1" ng-click="showLargeImage(1)">
+        <img ng-src="{{ detailLogObj.images.images[1] }}" class="dws-image" />
+      </div>
+      <!-- Image 3 - if available -->
+      <div class="dws-image-frame" ng-show="detailLogObj.images.noOfImages > 2" ng-click="showLargeImage(2)">
+        <img ng-src="{{ detailLogObj.images.images[2] }}" class="dws-image" />
+      </div>
+      <!-- Image 4 - if available -->
+      <div class="dws-image-frame" ng-show="detailLogObj.images.noOfImages > 3" ng-click="showLargeImage(3)">
+        <img ng-src="{{ detailLogObj.images.images[3] }}" class="dws-image" />
+      </div>
+	</div>
+  </div>
+</div>
+
+<!-- Enlarged image dialog -->
+<div ng-class="{'modal':!showImageDialog, 'modal show-modal modal-layer-image':showImageDialog}" ng-click="closeImageDialog()">
+  <div class="modal-content-image" ng-click="$event.stopPropagation()">
+    <span class="close-button" ng-click="closeImageDialog()">&times;</span>
+	<div class="image-dialog-frame">
+	  <img ng-src="{{ largeImage }}" class="image-dialog-image" />
+	</div>
+  </div>
+</div>
+
+<script>
+(function(scope) {
+const filterScanSource = localStorage.getItem('filterScanSource') || ''
+/*
+ * Statis texts for data headers for the DWS dashboard.
+ */
+scope.dataHeaders = {
+  packageCodes: {
+    noOfCodes: 0,
+    headers: []
+  },
+  sorting : {
+    header: ''
+  },
+  weight: {
+    weightHeader: '',
+    volWeightHeader: '',
+  },
+  dimensions: {
+    lengthHeader: '',
+    widthHeader: '',
+    heightHeader: '',
+    volumeHeader: '',
+  },
+  images: {
+    noOfImages: 0,
+  },
+  units: {
+    dimension: '',
+    volume: '',
+    weight: ''
+  },
+  status: {
+    error: '',
+    sorting: '',
+    datatransfer: '',
+    imagetransfer: ''
+  },
+  statistics: {
+    throughput: '',
+    errorRate: '',
+    lastReset: '',
+    firstPackage: '',
+    totalPackages: '',
+    errorPackages: '',
+    avgPerHour: '',
+    avgErrorRate: ''
+  }
+};
+
+/*
+ * Data object used for mapping and transferring package
+ * data to the DWS dashboard.
+ */
+scope.dataObject = {
+  hasData: false,
+  corrId: -1,
+  scanDate: '',
+  scanTime: '',
+  packageIds: {
+    noOfIds: 0,
+    ids: [],
+    good: []
+  },
+  sorting : {
+    sortPath: '',
+    good: false
+  },
+  weight: {
+    weight: '',
+    volumeWeight: '',
+    weightIsGood: false,
+    volumeWeightIsGood: false
+  },
+  dimensions: {
+    length: '',
+    width: '',
+    height: '',
+    volume: '',
+    lengthIsGood: false,
+    widthIsGood: false,
+    heightIsGood: false,
+    volumeIsGood: false
+  },
+  images: {
+    noOfImages: 0,
+    images: [],
+    good: []
+  },
+  completion: {
+    sorting: {
+      isSorted: false,
+      timestamp: '',
+      error: false,
+      statusTxt: ''
+    },
+    datatransfer: {
+      isTransferred: false,
+      timestamp: '',
+      error: false,
+      statusTxt: ''
+    },
+    imagetransfer: {
+      isTransferred: false,
+      timestamp: '',
+      error: false,
+      statusTxt: ''
+    }
+  },
+  isDataError: false,
+  statusTxt: {
+    short: '',
+    full: ''
+  },
+};
+
+/*
+* Package statistics
+*/
+scope.statistics = {
+  lastResetTime: '',
+  firstPackageTime: '',
+  lastPackageTime: '',
+  noOfPackages: 0,
+  noOfGoodPackages: 0,
+  noOfBadPackages: 0,
+  avgPackagesPerHour: 0,
+  avgGoodPackagesPerHour: 0,
+  avgBadPackagesPerHour: 0,
+  errorRate: 0,
+  currentThroughput: 0,
+  currentErrorRate: 0
+};
+
+/*
+ * DWS dashboard configuration data
+ */
+scope.dashboardConfig = {
+  packageLog: {
+    noOfRecords: 500
+  }
+};
+
+/*
+ * DWS log list
+ */
+scope.logList = [];
+scope.setMaxLogListLength = () => {
+  if(scope.logList.length > scope.dashboardConfig.packageLog.noOfRecords)
+    // Shorten the list
+	scope.logList.length = scope.dashboardConfig.packageLog.noOfRecords;
+};
+scope.addLog = (packageObj) => {
+  // This is not super efficient but we want to have the
+  // newest log on top and push the oldest out if we're out of space. Would
+  // be much better with a linked list but to my knowledge no support
+  // by Angularjs.
+  // First of all - check if the object has data. That will not be the
+  // case at start up
+  if(!packageObj.hasData) {
+    // It doesn't
+    return;
+  }
+  let startIndex = scope.logList.length;
+  if(startIndex >= scope.dashboardConfig.packageLog.noOfRecords)
+    startIndex = scope.dashboardConfig.packageLog.noOfRecords-1;
+  else
+    // Allocate space for one more reccord reference
+	scope.logList.push(null);
+  for(i = startIndex; i>0; i--)
+    scope.logList[i] = scope.logList[i-1];
+  // Add the new record. NB: We have to make a deep copy of the object - otherwise
+  // we'll just reference the same object all the way through
+  scope.logList[0] = angular.copy(packageObj);
+};
+// Finds a log object from the correlation id. Returns the index to scope.logList
+// of the object if found, -1 if not.
+scope.getLog = (corrId) => {
+  let logLength = scope.logList.length;
+  let foundIndex = -1;
+  for(let i=0; i<logLength && foundIndex<0; i++) {
+	if(scope.logList[i].corrId == corrId)
+	  // Got the object
+	  foundIndex = i;
+  }
+  return foundIndex;
+};
+
+/*
+* Gauges
+*/
+scope.errorRateGauge = Gauge(
+  document.getElementById('dws-stats-error-rate'), {
+    min: 0,
+    max: 100,
+    dialStartAngle: 180,
+    dialEndAngle: 0,
+    value: 0,
+    color: function(value) {
+        if(value < 10) {
+          return '#37b332';
+        }else if(value < 25) {
+          return '#8bdd88';
+        }else if(value < 50) {
+          return '#ffff00';
+        }else {
+          return '#f62323';
+        }
+    }
+  }
+);
+scope.throughputGauge = Gauge(
+  document.getElementById('dws-stats-throughput'), {
+    min: 0,
+    max: 6000,
+    dialStartAngle: 180,
+    dialEndAngle: 0,
+    value: 50,
+     color: function(value) {
+        if(value < 500) {
+          return '#d8f4d7';
+        }else if(value < 1200) {
+          return '#8bdd88';
+        }else {
+          return '#37b332';
+        }
+     }
+  }
+);
+
+/*
+* Log details modeless dialog
+*/
+scope.showLogDetailsDialog = false;
+scope.detailLogObj = null;
+scope.showLogDetails = (index) => {
+  if(index < 0)
+    scope.detailLogObj = scope.dataObject;
+  else
+    scope.detailLogObj = scope.logList[index];
+  if(scope.detailLogObj.hasData)
+    // This check shouldn't be necessary but just in case something went wrong
+	scope.openLogDetailsDialog();
+};
+scope.openLogDetailsDialog = () => {
+  scope.showLogDetailsDialog = true;
+};
+scope.closeLogDetailsDialog = () => {
+  scope.showLogDetailsDialog = false;
+};
+scope.prevLogDetails = () => {
+  if(!scope.detailLogObj)
+    return;
+  /* Find the currently displayed log detail in the lists */
+  let found = false;
+  let index = scope.getLog(scope.detailLogObj.corrId);
+  if(index<0) {
+    if(scope.detailLogObj.corrId === scope.dataObject.corrId)
+	  found = true;
+  } else
+    found = true;
+  if(!found) {
+    // We'll assume that the last item in the list was selected
+	// and was later removed from the list. Show the current
+	// last item - if there is any
+	if(scope.logList.length)
+	  scope.detailLogObj = scope.logList[scope.logList.length-1];
+  }
+  else {
+    if(index<0) {
+	  // The selected item is the latest. We can't go up. select
+	  // the very last item in the history - if there is a history
+	  if(scope.logList.length)
+	    scope.detailLogObj = scope.logList[scope.logList.length-1];
+	}
+	else {
+	  if(index === 0)
+	    scope.detailLogObj = scope.dataObject;
+	  else
+	    scope.detailLogObj = scope.logList[index-1];
+	}
+  }
+}
+scope.nextLogDetails = () => {
+  if(!scope.detailLogObj)
+    return;
+  /* Find the currently displayed log detail in the lists */
+  let found = false;
+  let index = scope.getLog(scope.detailLogObj.corrId);
+  if(index<0) {
+    if(scope.detailLogObj.corrId === scope.dataObject.corrId)
+	  found = true;
+  } else
+    found = true;
+  if(!found)
+    // We'll assume that the last item in the list was selected
+	// and was later removed from the list. Show the most recent item
+	scope.detailLogObj = scope.dataObject;
+  else {
+    if(index<0) {
+	  // The selected item is the latest. Show first item from the
+	  // history - if there is a history
+      if(scope.logList.length)
+	    scope.detailLogObj = scope.logList[0];
+	}
+	else {
+	  if(index === scope.logList.length-1)
+	    // Last item in the history. Show latest
+	    scope.detailLogObj = scope.dataObject;
+	  else
+	    scope.detailLogObj = scope.logList[index+1];
+	}
+  }
+}
+
+/**
+* Image dialog
+*/
+scope.showImageDialog = false;
+scope.largeImage = null;
+scope.showLargeImage = (index) => {
+  if(scope.detailLogObj.images.noOfImages >= index + 1) {  // Add condition: && scope.detailLogObj.images.good[index]
+    scope.largeImage = scope.detailLogObj.images.images[index];
+	scope.openImageDialog();
+  }
+};
+scope.openImageDialog = () => {
+  scope.showImageDialog = true;
+}
+scope.closeImageDialog = () => {
+  scope.showImageDialog = false;
+}
+
+
+/*
+* The initialized flag tells if the template has been initialized. The template
+* is considered inintialized when the first data package has been received.
+*/
+scope.initialized = false;
+
+/*
+* Data update/message handler
+*/
+scope.$watch('msg', (msg) => {
+  if(msg) {
+    // Update displayed status when a data update is received
+	switch(msg.topic) {
+    case 'uiData':
+	    scope.initialized = true;
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+	    scope.addLog(scope.dataObject);
+      scope.dataObject = msg.payload;
+	  break;
+
+    case 'uiDataUpdate':
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      // First check the current record, i.e. scope.dataObject.
+      if(scope.dataObject.corrId == msg.payload.corrId) {
+        scope.dataObject = msg.payload;
+      }
+      else {
+        // Not found - then check the historic ones
+        let logIndex = scope.getLog(msg.payload.corrId);
+        if(logIndex >= 0) {
+          scope.logList[logIndex] = msg.payload;
+        }
+      }
+      break;
+
+	  case 'uiStatistics':
+      scope.statistics = filterScanSource ? msg.payload.bySource[filterScanSource] : msg.payload
+	    scope.errorRateGauge.setValueAnimated(scope.statistics.currentErrorRate, 2);
+      scope.throughputGauge.setValueAnimated(scope.statistics.currentThroughput, 2);
+	  break;
+
+	  case 'uiSortingUpdate': {
+	    // Locate the record to be updated
+      let updateThis = null;
+      // First check the current record, i.e. scope.dataObject.
+      if(scope.dataObject.corrId == msg.payload.corrId)
+        // Got it
+        updateThis = scope.dataObject;
+      else {
+        // Not found - then check the historic ones
+        let logIndex = scope.getLog(msg.payload.corrId);
+        if(logIndex >= 0)
+          // Found!
+          updateThis = scope.logList[logIndex];
+      }
+      if(updateThis) {
+        // Update status
+        updateThis.completion.sorting.isSorted = msg.payload.isSorted;
+        updateThis.completion.sorting.timestamp = msg.payload.timestamp;
+        updateThis.completion.sorting.error = msg.payload.error;
+        updateThis.completion.sorting.statusTxt = msg.payload.statusTxt;
+        if (msg.payload.error) {
+          // Display sorting error in the main package view if there was any.
+          // This is used to show dropped off messages.
+          updateThis.statusTxt.short += (updateThis.statusTxt.short ? '. ' : '') + msg.payload.statusTxt
+        }
+        else {
+          // TODO HACK for Iceland Post ring scanner parcel recovery. Need to think of more structural way to keep messages.
+          updateThis.statusTxt.short = updateThis.statusTxt.short.replace(/Sort error: .*/, '')
+        }
+      }
+	  }
+	  break;
+
+	  case 'uiDataTransferUpdate': {
+	    // Locate the record to be updated
+      let updateThis = null;
+      // First check the current record, i.e. scope.dataObject.
+      if(scope.dataObject.corrId == msg.payload.corrId)
+        // Got it
+        updateThis = scope.dataObject;
+      else {
+        // Not found - then check the historic ones
+        let logIndex = scope.getLog(msg.payload.corrId);
+        if(logIndex >= 0)
+          // Found!
+          updateThis = scope.logList[logIndex];
+      }
+      if(updateThis) {
+        // Update status
+        updateThis.completion.datatransfer.isTransferred = msg.payload.isTransferred;
+        updateThis.completion.datatransfer.timestamp = msg.payload.timestamp;
+        updateThis.completion.datatransfer.error = msg.payload.error;
+        updateThis.completion.datatransfer.statusTxt = msg.payload.statusTxt;
+      }
+	  }
+	  break;
+
+	  case 'uiImageTransferUpdate': {
+	    // Locate the record to be updated
+      let updateThis = null;
+      // First check the current record, i.e. scope.dataObject.
+      if(scope.dataObject.corrId == msg.payload.corrId)
+        // Got it
+        updateThis = scope.dataObject;
+      else {
+        // Not found - then check the historic ones
+        let logIndex = scope.getLog(msg.payload.corrId);
+        if(logIndex >= 0)
+          // Found!
+          updateThis = scope.logList[logIndex];
+      }
+      if(updateThis) {
+        // Update status
+        updateThis.completion.imagetransfer.isTransferred = msg.payload.isTransferred;
+        updateThis.completion.imagetransfer.timestamp = msg.payload.timestamp;
+        updateThis.completion.imagetransfer.error = msg.payload.error;
+        updateThis.completion.imagetransfer.statusTxt = msg.payload.statusTxt;
+      }
+	  }
+	  break;
+
+	  case 'uiDataheaders':
+      scope.dataHeaders = msg.payload;
+	  break;
+
+	  case 'uiConfig':
+	    scope.dashboardConfig = msg.payload;
+	    scope.setMaxLogListLength();
+	  break;
+
+	  default:
+	    // Ignore
+	}
+  }
+});
+})(scope);
+
+
+</script>

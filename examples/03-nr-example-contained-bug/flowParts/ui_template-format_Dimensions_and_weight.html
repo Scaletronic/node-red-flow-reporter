@@ -1,0 +1,188 @@
+<link rel="stylesheet" type="text/css" href="/scaletronic-dws.css">
+<div class="dws-rounded-box dws-box-spacer">
+  <div class="dws-data-header">{{ dataHeaders.dimensions.lengthHeader }}</div>
+  <div class="dws-data-frame">
+    <div ng-show="!dataObject.hasData || dataObject.dimensions.lengthIsGood && dataObject.dimensions.length" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.dimensions.lengthIsGood && dataObject.dimensions.length" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'dws-data dws-good-data':(dataObject.dimensions.lengthIsGood || !dataObject.hasData), 'dws-data dws-bad-data':(!dataObject.dimensions.lengthIsGood && dataObject.hasData)}">{{ dataObject.dimensions.length }}</div>
+    <div class="dws-unit">{{ dataHeaders.units.dimension }}</div>
+  </div>
+  <div class="dws-data-header">{{ dataHeaders.dimensions.widthHeader }}</div>
+  <div class="dws-data-frame">
+    <div ng-show="!dataObject.hasData || dataObject.dimensions.widthIsGood && dataObject.dimensions.width" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.dimensions.widthIsGood && dataObject.dimensions.width" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'dws-data dws-good-data':(dataObject.dimensions.widthIsGood || !dataObject.hasData), 'dws-data dws-bad-data':(!dataObject.dimensions.widthIsGood && dataObject.hasData)}">{{ dataObject.dimensions.width }}</div>
+    <div class="dws-unit">{{ dataHeaders.units.dimension }}</div>
+  </div>
+  <div class="dws-data-header">{{ dataHeaders.dimensions.heightHeader }}</div>
+  <div class="dws-data-frame">
+    <div ng-show="!dataObject.hasData || dataObject.dimensions.heightIsGood && dataObject.dimensions.height" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.dimensions.heightIsGood && dataObject.dimensions.height" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'dws-data dws-good-data':(dataObject.dimensions.heightIsGood || !dataObject.hasData), 'dws-data dws-bad-data':(!dataObject.dimensions.heightIsGood && dataObject.hasData)}">{{ dataObject.dimensions.height }}</div>
+    <div class="dws-unit">{{ dataHeaders.units.dimension }}</div>
+  </div>
+</div>
+<div class="dws-rounded-box dws-box-spacer">
+  <div class="dws-data-header">{{ dataHeaders.dimensions.volumeHeader }}</div>
+  <div class="dws-data-frame">
+    <div ng-show="!dataObject.hasData || dataObject.dimensions.volumeIsGood && dataObject.dimensions.volume" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.dimensions.volumeIsGood && dataObject.dimensions.volume" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'dws-data dws-good-data':(dataObject.dimensions.volumeIsGood || !dataObject.hasData), 'dws-data dws-bad-data':(!dataObject.dimensions.volumeIsGood && dataObject.hasData)}">{{ dataObject.dimensions.volume }}</div>
+    <div class="dws-unit">{{ dataHeaders.units.volume }}</div>
+  </div>
+</div>
+<div class="dws-rounded-box">
+  <div class="dws-data-header">{{ dataHeaders.weight.weightHeader }}</div>
+  <div class="dws-data-frame">
+    <div ng-show="!dataObject.hasData || dataObject.weight.weightIsGood && dataObject.weight.weight" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.weight.weightIsGood && dataObject.weight.weight" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'dws-data dws-good-data':(dataObject.weight.weightIsGood || !dataObject.hasData), 'dws-data dws-bad-data':(!dataObject.weight.weightIsGood && dataObject.hasData)}">{{ dataObject.weight.weight }}</div>
+    <div class="dws-unit">{{ dataHeaders.units.weight }}</div>
+  </div>
+  <div class="dws-data-header">{{ dataHeaders.weight.volWeightHeader }}</div>
+  <div class="dws-data-frame">
+    <div ng-show="!dataObject.hasData || dataObject.weight.volumeWeightIsGood && dataObject.weight.volumeWeight" ng-class="{'dws-check-mark dws-check-mark-good':dataObject.hasData, 'dws-check-mark dws-check-mark-pending':!dataObject.hasData}"><i class="fa fa-check"></i></div>
+    <div ng-show="dataObject.hasData && !dataObject.weight.volumeWeightIsGood && dataObject.weight.volumeWeight" class="dws-check-mark dws-check-mark-bad"><i class="fa fa-close"></i></div>
+    <div ng-class="{'dws-data dws-good-data':(dataObject.weight.volumeWeightIsGood || !dataObject.hasData), 'dws-data dws-bad-data':(!dataObject.weight.volumeWeightIsGood && dataObject.hasData)}">{{ dataObject.weight.volumeWeight }}</div>
+    <div class="dws-unit">{{ dataHeaders.units.weight }}</div>
+  </div>
+</div>
+
+<script>
+(function(scope) {
+const filterScanSource = localStorage.getItem('filterScanSource') || ''
+/**
+ * Statis texts for data headers for the DWS dashboard.
+ */
+scope.dataHeaders = {
+  packageCodes: {
+    noOfCodes: 0,
+    headers: []
+  },
+  sorting : {
+    header: ''
+  },
+  weight: {
+    weightHeader: '',
+    volWeightHeader: '',
+  },
+  dimensions: {
+    lengthHeader: '',
+    widthHeader: '',
+    heightHeader: '',
+    volumeHeader: '',
+  },
+  images: {
+    noOfImages: 0,
+  },
+  units: {
+    dimension: '',
+    volume: '',
+    weight: ''
+  },
+  status: {
+    error: '',
+    sorting: '',
+    datatransfer: '',
+    imagetransfer: ''
+  },
+  statistics: {
+    throughput: '',
+    errorRate: '',
+    lastReset: '',
+    firstPackage: '',
+    totalPackages: '',
+    errorPackages: '',
+    avgPerHour: '',
+    avgErrorRate: ''
+  }
+};
+
+/**
+ * Data object used for mapping and transferring package
+ * data to the DWS dashboard.
+ */
+scope.dataObject = {
+  hasData: false,
+  corrId: -1,
+  scanDate: '',
+  scanTime: '',
+  packageIds: {
+    noOfIds: 0,
+    ids: [],
+    good: []
+  },
+  sorting : {
+    sortPath: '',
+    good: false
+  },
+  weight: {
+    weight: '',
+    volumeWeight: '',
+    weightIsGood: false,
+    volumeWeightIsGood: false
+  },
+  dimensions: {
+    length: '',
+    width: '',
+    height: '',
+    volume: '',
+    lengthIsGood: false,
+    widthIsGood: false,
+    heightIsGood: false,
+    volumeIsGood: false
+  },
+  images: {
+    noOfImages: 0,
+    images: [],
+    good: []
+  },
+  completion: {
+    sorting: {
+      isSorted: false,
+      timestamp: '',
+      error: false,
+      statusTxt: ''
+    },
+    datatransfer: {
+      isTransferred: false,
+      timestamp: '',
+      error: false,
+      statusTxt: ''
+    },
+    imagetransfer: {
+      isTransferred: false,
+      timestamp: '',
+      error: false,
+      statusTxt: ''
+    }
+  },
+  isDataError: false,
+  statusTxt: {
+    short: '',
+    full: ''
+  },
+};
+
+scope.$watch("msg", (msg) => {
+  if(msg) {
+    // Update displayed status when a data update is received
+    if (msg.topic === 'uiDataheaders') {
+      scope.dataHeaders = msg.payload;
+    }
+    else if (msg.topic === 'uiData') {
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      scope.dataObject = msg.payload;
+    }
+    else if (msg.topic === 'uiDataUpdate' && scope.dataObject.corrId == msg.payload.corrId) {
+      if (filterScanSource && msg.payload.scanSource != filterScanSource) {
+        return
+      }
+      scope.dataObject = msg.payload;
+    }
+  }
+});
+})(scope);
+</script>

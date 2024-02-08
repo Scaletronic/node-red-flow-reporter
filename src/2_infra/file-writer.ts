@@ -5,9 +5,9 @@ import { OutputSubPart } from "../0_domain/OutputWriter.interface";
 const outputParts: String[] = []
 
 function deleteAllFiles(supPartPath: string) {
+  if (!existsSync(supPartPath)) return
   const files = readdirSync(supPartPath)
   for (const file of files) {
-    console.log("Deleting file: " + file)
     unlinkSync(path.join(supPartPath, file))
   }
 }
@@ -24,6 +24,7 @@ export function writeOutputPart(fileName: string) {
   const supPartPath = path.join(path.dirname(fileName), 'flowParts')
   deleteAllFiles(supPartPath)  
   
+  if (!existsSync(supPartPath)) mkdirSync(supPartPath, { recursive: true } )
   subParts.forEach(subPart => {
     const supPartPath = path.join(path.dirname(fileName), 'flowParts')
     if (!existsSync(supPartPath)) mkdirSync(supPartPath, { recursive: true } )

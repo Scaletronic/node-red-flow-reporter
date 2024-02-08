@@ -15,6 +15,9 @@ const fakeFileWriter: OutputWriter = {
     fwOutput=lines.join("\n")
 //    return lines.join('\n')
   },
+  addSubPart(outputPart: string, subpartNames: string[]) {
+    throw new Error("Method not implemented.")
+  }
 }
 
 const fw = fakeFileWriter
@@ -169,12 +172,26 @@ describe("NodeRed Nodes to Table", () => {
 
 describe("Text to MD", () => {
   const tableHead: Thead = {
-    tds: [{ content: "HA" }, { content: "HBBB" }, { content: "HCCC" }]
+    tds: [
+      { content: "HA" }, 
+      { content: "HBBB" }, 
+      { content: "HCCC" }]
   }
   const tableBody: Tr[] = [
-    { tds: [{ content: "A" }, { content: "BB" }, { content: "CCC" }] },
-    { tds: [{ content: "AA" }, { content: "B" }, { content: "CCC" }] },
-    { tds: [{ content: "AAA" }, { content: "BBB" }, { content: "C" }] }
+    { tds: [
+     { content: "A", headline: "Test", parentRowName: "Test" },
+     { content: "BB", headline: "Test", parentRowName: "Test" }, 
+     { content: "CCC", headline: "Test", parentRowName: "Test" }
+    ] },
+    { tds: [
+      { content: "AA", headline: "Test", parentRowName: "Test" }, 
+      { content: "B", headline: "Test", parentRowName: "Test" }, 
+      { content: "CCC", headline: "Test", parentRowName: "Test" }
+    ] },
+    { tds: [
+      { content: "AAA", headline: "Test", parentRowName: "Test" }, 
+      { content: "BBB", headline: "Test", parentRowName: "Test" }, 
+      { content: "C", headline: "Test", parentRowName: "Test" }] }
   ]
   const table: Table = { head: tableHead, trs: tableBody, nodeType: "TestNode"}
   it("should create same space", () => {
