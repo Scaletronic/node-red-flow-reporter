@@ -31,13 +31,6 @@ To use the NodeRed Flow Reporter run the following
 
 `fileName` is a path to your flow.json file
 
-### Experimental features
-
-There is a new parser in this version. it can be used as this
-
-    npm run ts-cli -- -- .\examples\P0001_test-ring\flow.json -V 2 
-
-
 ### Using Git
 You can also checkout the repository, if you want to contribute or see the TypeScript code before it is transpiled to JavaScript. 
 
