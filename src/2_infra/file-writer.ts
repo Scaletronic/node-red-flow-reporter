@@ -59,5 +59,10 @@ export function contentForReadMeTxt() {
     Link to tool:
       https://github.com/Scaletronic/node-red-flow-reporter
 
+
+    The Markdown files can be viewed in a browser with this extension.
+
+      https://github.com/simov/markdown-viewer      
+
   `
 }

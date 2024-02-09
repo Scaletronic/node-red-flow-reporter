@@ -42,6 +42,14 @@ And then the Flow Reporter will create
 
     examples\02-nr-ex-common-complete\01 - Handle completion of node execution.json.md
 
+### Reading the Markdown files in a browser
+
+The Markdown files can be viewed in a browser with this extension.
+
+https://github.com/simov/markdown-viewer
+
+
+### Comparing two Markdowns can be done with a Text Compare tool such as Beond Compare
 
 
 
