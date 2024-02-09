@@ -15,7 +15,7 @@ function formatNodeInformation(nodes, node, headline, allNodes) {
             {
                 const otherTypeNodes = allNodes[headline];
                 if (otherTypeNodes === undefined)
-                    return 'Bad reference: ' + JSON.stringify(value, undefined, "&nbsp;");
+                    return 'Bad reference: ' + JSON.stringify(value, undefined, "");
                 const otherTypeNodeIndex = otherTypeNodes.findIndex((node) => node.id == value);
                 if (otherTypeNodeIndex > -1)
                     return otherTypeNodes[otherTypeNodeIndex].config.name;

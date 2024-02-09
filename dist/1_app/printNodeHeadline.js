@@ -11,7 +11,7 @@ function setOutputWriter(fw) {
 }
 exports.setOutputWriter = setOutputWriter;
 /**
- *
+ * @deprecated
  * @param nodes Nodes to format
  * @param allNodes Array of all nodes, to use for look up of names
  */
@@ -39,7 +39,7 @@ function printNodeHeadline(nodes, allNodes) {
                 cellContentForRow.push((0, formatters_1.formatNodeInformation)(nodes, node.config, headline, allNodes).padStart(maxColLength));
             }
             else {
-                cellContentForRow.push('&nbsp;');
+                cellContentForRow.push('');
             }
         });
         fileWriteLine(cellContentForRow.join(" | ").trim());
@@ -62,7 +62,7 @@ function TdContentToString(td) {
         default: throw new Error(`Unknown type ${contentType}` + td.headline + td.parentRowName);
     }
     if (contentAsString.length == 0)
-        contentAsString = '&nbsp;';
+        contentAsString = '';
     //throw new Error("Empty content:" + td.content + ":" + td.headline + td.parentRow.tds[0].content)  
     return Object.assign(Object.assign({}, td), { content: contentAsString });
 }
@@ -82,12 +82,12 @@ function tableFilterOutCropAndSaveToSubParts(table) {
     const subParts = [];
     const tableWithSubParts = { table: table, subParts: [] };
     table.trs.forEach(tr => tr.tds.forEach((td) => {
-        if (td.content == 'crop for the win' || td.content.length > 60) {
+        if (td.content.length > 100) {
             // Remove whitespace and replace with underscore
             const fileName = table.nodeType + '-' + td.headline + '_' + td.parentRowName.replace(/\s/g, '_') + '.' + guessFileTypeByContent(td.content);
             const subPart = { names: [fileName], content: td.content.toString() };
             subParts.push(subPart);
-            td.content = 'To long, moved to file: ' + fileName;
+            td.content = 'To long, moved to file' + fileName;
         }
     }));
     tableWithSubParts.subParts = subParts;
@@ -142,7 +142,7 @@ function nodesToTable(nodes, allNodes) {
                 td.content = (0, formatters_1.formatNodeInformation)(nodes, node.config, headline, allNodes).toString();
             }
             else {
-                _content = '&nbsp;';
+                _content = '';
             }
             td.headline = headline;
             if (headline == 'name')
@@ -164,7 +164,7 @@ function tableToMarkdown(table) {
             allLengthsByColumn[index] = Math.max(allLengthsByColumn[index], td.content.length);
         });
     });
-    const tableHeadMarkdown = table.head.tds.map(td => td.content.padStart(firstLength)).join(" | ");
+    const tableHeadMarkdown = table.head.tds.map((td, index) => td.content.padEnd(allLengthsByColumn[index])).join(" | ");
     // replace all alphanumeric chars and whitespace with "-"
     const tableLine = tableHeadMarkdown.replace(/[\w\s]/g, "-");
     table.trs.forEach(tr => tr.tds.forEach((td) => {
@@ -178,22 +178,18 @@ function tableToMarkdown(table) {
         let contentAsString = "";
         switch (contentType) {
             case "string":
-                contentAsString = td.content.padStart(allLengthsByColumn[index]);
+                contentAsString = td.content.padEnd(allLengthsByColumn[index]);
                 break;
             case "number":
                 contentAsString = td.content.toString().padStart(allLengthsByColumn[index]);
                 break;
             case "object":
-                contentAsString = JSON.stringify(td.content).padStart(allLengthsByColumn[index]);
+                contentAsString = JSON.stringify(td.content).padEnd(allLengthsByColumn[index]);
                 break;
             default: throw new Error(`Unknown type ${contentType}`);
         }
         if (contentAsString.length == 0)
             throw new Error("Empty content");
-        // if (contentAsString.length > 80) {
-        //     console.log('cropping', contentAsString.slice(0, 30));
-        //     return 'crop for the win';
-        // }
         return contentAsString;
     }));
     const tableBodyMarkdown = tableBodyAsStrings.map(row => '|' + row.join(" | ")).join("\n");

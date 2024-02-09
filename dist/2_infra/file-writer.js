@@ -32,7 +32,6 @@ function deleteAllFiles(supPartPath) {
         return;
     const files = (0, fs_1.readdirSync)(supPartPath);
     for (const file of files) {
-        console.log("Deleting file: " + file);
         (0, fs_1.unlinkSync)(path.join(supPartPath, file));
     }
 }

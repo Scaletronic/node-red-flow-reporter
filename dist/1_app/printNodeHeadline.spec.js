@@ -186,11 +186,11 @@ describe("Text to MD", () => {
     const table = { head: tableHead, trs: tableBody, nodeType: "TestNode" };
     it("should create same space", () => {
         const markdownTable = (0, printNodeHeadline_1.tableToMarkdown)(table);
-        const expectedMarkdown = `| HA | HBBB | HCCC
+        const expectedMarkdown = `|HA  | HBBB | HCCC
 |----|------|-----
-|  A |   BB |  CCC
-| AA |    B |  CCC
-|AAA |  BBB |    C`;
+|A   | BB   | CCC
+|AA  | B    | CCC 
+|AAA | BBB  | C   `;
         (0, chai_1.expect)(markdownTable).to.eq(expectedMarkdown);
     });
 });
