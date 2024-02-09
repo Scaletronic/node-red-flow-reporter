@@ -1,6 +1,6 @@
 {
   "name": "node-red-flow-reporter",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Node-RED Flow File Reporter - better version control experience and documentation with Node-RED Flows",
   "main": "dist/index.js",
   "repository": {
@@ -14,7 +14,9 @@
   "scripts": {
     "test": "ts-mocha src/**/*.spec.ts",
     "ts-cli": "ts-node src",
-    "build": "tsc"
+    "build": "tsc",
+    "prepub": "npm run build",
+    "pub": "npm publish --access public"  
   },
   "author": "Andreas Markussen <am@scaletronic.dk>",
   "license": "ISC",

@@ -196,11 +196,11 @@ describe("Text to MD", () => {
   const table: Table = { head: tableHead, trs: tableBody, nodeType: "TestNode"}
   it("should create same space", () => {
     const markdownTable = tableToMarkdown(table)
-    const expectedMarkdown = `| HA | HBBB | HCCC
+    const expectedMarkdown = `|HA  | HBBB | HCCC
 |----|------|-----
-|  A |   BB |  CCC
-| AA |    B |  CCC
-|AAA |  BBB |    C`
+|A   | BB   | CCC 
+|AA  | B    | CCC 
+|AAA | BBB  | C   `
     expect(markdownTable).to.eq(expectedMarkdown)
   })
 })

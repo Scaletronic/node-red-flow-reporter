@@ -37,7 +37,7 @@ export function printNodeHeadline(nodes: any[], allNodes: NodesType): void {
       } else if (node.config[headline]) {
         cellContentForRow.push(formatNodeInformation(nodes, node.config, headline, allNodes).padStart(maxColLength));
       } else {
-        cellContentForRow.push('&nbsp;');
+        cellContentForRow.push('');
       }
     });
     fileWriteLine(cellContentForRow.join(" | ").trim());
@@ -59,7 +59,7 @@ function TdContentToString(td: Td): Td {
     case "object": contentAsString = JSON.stringify(td.content); break;
     default: throw new Error(`Unknown type ${contentType}` + td.headline + td.parentRowName)
   }
-  if (contentAsString.length == 0) contentAsString = '&nbsp;'
+  if (contentAsString.length == 0) contentAsString = ''
   //throw new Error("Empty content:" + td.content + ":" + td.headline + td.parentRow.tds[0].content)  
   return { ...td, content: contentAsString }
 }
@@ -134,7 +134,7 @@ export function nodesToTable(nodes: any[], allNodes: NodesType): Table {
       } else if (node.config[headline]) {
         td.content = formatNodeInformation(nodes, node.config, headline, allNodes).toString()
       } else {
-        _content = '&nbsp;'
+        _content = ''
       }
       td.headline = headline
       if (headline == 'name') td.parentRowName = td.content

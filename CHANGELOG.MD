@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.8
+ 
+ * Removed the use of &nbsp;
+
+## 1.0.7
+
+ * Internal Bugs
+
 ## 1.0.6
 
 * Clean up code

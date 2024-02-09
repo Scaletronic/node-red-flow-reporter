@@ -12,7 +12,7 @@ export function formatNodeInformation(nodes: Record<string, any>, node: any, hea
     case 'ioConnect':       
       {
         const otherTypeNodes = allNodes[headline]
-        if(otherTypeNodes === undefined) return 'Bad reference: ' + JSON.stringify(value,undefined,"&nbsp;")
+        if(otherTypeNodes === undefined) return 'Bad reference: ' + JSON.stringify(value,undefined,"")
         const otherTypeNodeIndex = otherTypeNodes.findIndex((node: any) => node.id == value)
         if (otherTypeNodeIndex > -1) return otherTypeNodes[otherTypeNodeIndex].config.name;
         return 'Not found';
