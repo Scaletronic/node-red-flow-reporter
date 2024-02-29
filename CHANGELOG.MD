@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9
+
+ * Fixed bug with empty content 
+
 ## 1.0.8
  
  * Removed the use of &nbsp;

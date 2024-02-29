@@ -1,6 +1,6 @@
 {
   "name": "node-red-flow-reporter",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Node-RED Flow File Reporter - better version control experience and documentation with Node-RED Flows",
   "main": "dist/index.js",
   "repository": {

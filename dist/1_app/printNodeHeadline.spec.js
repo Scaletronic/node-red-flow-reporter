@@ -188,7 +188,7 @@ describe("Text to MD", () => {
         const markdownTable = (0, printNodeHeadline_1.tableToMarkdown)(table);
         const expectedMarkdown = `|HA  | HBBB | HCCC
 |----|------|-----
-|A   | BB   | CCC
+|A   | BB   | CCC 
 |AA  | B    | CCC 
 |AAA | BBB  | C   `;
         (0, chai_1.expect)(markdownTable).to.eq(expectedMarkdown);

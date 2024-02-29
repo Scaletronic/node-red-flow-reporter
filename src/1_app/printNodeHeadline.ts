@@ -158,12 +158,6 @@ export function tableToMarkdown(table: Table): string {
   const tableHeadMarkdown = table.head.tds.map((td, index) => td.content.padEnd(allLengthsByColumn[index])).join(" | ")
   // replace all alphanumeric chars and whitespace with "-"
   const tableLine = tableHeadMarkdown.replace(/[\w\s]/g, "-")
-  table.trs.forEach(tr => tr.tds.forEach((td) => {
-    if (!td.content) {
-      console.log("Empty content", tr.tds, td.content)
-      throw new Error("Empty content!!")
-    }
-  }))
   const tableBodyAsStrings = table.trs.map(tr => tr.tds.map((td, index) => {
     const contentType = typeof td.content
     let contentAsString = ""
